@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OM RP Engenharia</title>
+
+<style>
+body{font-family:Arial;background:#eef2f6;margin:0;padding:10px}
+.container{max-width:1100px;margin:auto;background:#fff;padding:15px;border-radius:12px}
+h2{background:#0b3d91;color:#fff;padding:8px;border-radius:6px;font-size:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+input,select,textarea{width:100%;padding:8px;border-radius:6px;border:1px solid #aaa}
+textarea{min-height:60px}
+button{width:100%;margin-top:10px;background:#0b3d91;color:#fff;border:none;padding:12px;border-radius:8px;font-size:16px}
+canvas{border:1px solid #333;border-radius:6px;width:100%;height:130px;touch-action:none}
+.photo-preview img{height:70px;margin:4px;border-radius:6px;border:1px solid #ccc}
+.logo{max-width:180px;margin-bottom:10px}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<img src="RP.jpg" class="logo">
+
+<h2>Dados Gerais</h2>
+<div class="grid">
+<input id="instalacao" placeholder="Instalação *">
+<input id="municipio" placeholder="Município *">
+<input id="os" placeholder="OS SAP *">
+<input type="date" id="data">
+<input type="time" id="hora">
+</div>
+
+<label>Tipo de Manutenção</label>
+<select id="tipo">
+<option>Corretiva Emergencial</option>
+<option>Corretiva Programada</option>
+<option>Sob Condições</option>
+</select>
+
+<h2>Segurança</h2>
+<div class="grid">
+<select id="apr"><option>APR - Sim</option><option>APR - Não</option></select>
+<select id="lpe"><option>LPE - Sim</option><option>LPE - Não</option></select>
+<select id="pet"><option>PET - Sim</option><option>PET - Não</option></select>
+</div>
+
+<h2>Equipe</h2>
+<div class="grid">
+<input id="eletricista" placeholder="Eletricista">
+<input type="time" id="e_inicio">
+<input type="time" id="e_fim">
+<input id="mecanico" placeholder="Mecânico">
+<input type="time" id="m_inicio">
+<input type="time" id="m_fim">
+</div>
+
+<h2>Estação / Grupo Parado</h2>
+<select id="parado" onchange="detalhesParado.style.display=this.value==='Sim'?'block':'none'">
+<option>Não</option>
+<option>Sim</option>
+</select>
+
+<div id="detalhesParado" style="display:none">
+<input id="grupo" placeholder="Grupo / Estação">
+<input type="time" id="p_inicio">
+<input type="time" id="p_fim">
+</div>
+
+<h2>Serviços</h2>
+<textarea id="ocorrencia" placeholder="Ocorrência"></textarea>
+<textarea id="resumo" placeholder="Resumo do serviço *"></textarea>
+<textarea id="realizado" placeholder="Serviço realizado"></textarea>
+
+<label>Serviço Concluído</label>
+<select id="concluido"><option>Sim</option><option>Não</option></select>
+
+<h2>Materiais</h2>
+<div class="grid">
+<input id="mat_desc" placeholder="Descrição">
+<input id="mat_qtd" placeholder="Quantidade">
+<input id="mat_forn" placeholder="Fornecedor">
+</div>
+
+<h2>Fotos do Serviço (obrigatório)</h2>
+<input type="file" id="fotos" multiple accept="image/*">
+<div class="photo-preview" id="preview"></div>
+
+<h2>Responsável</h2>
+<input id="responsavel" placeholder="Nome do responsável *">
+
+<h2>Assinatura</h2>
+<canvas id="sign"></canvas>
+<button onclick="limparAssinatura()">Limpar Assinatura</button>
+
+<button onclick="gerarPDF()">💾 SALVAR PDF</button>
+<button onclick="enviarWhats()">📲 ENVIAR WHATSAPP</button>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+// ===== ASSINATURA SUAVE MOBILE =====
+const canvas=document.getElementById("sign");
+const ctx=canvas.getContext("2d");
+canvas.width=canvas.offsetWidth;
+canvas.height=canvas.offsetHeight;
+ctx.lineWidth=2; ctx.lineCap="round";
+
+let drawing=false;
+let lastX=0,lastY=0;
+
+function getPos(e){
+ const r=canvas.getBoundingClientRect();
+ const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
+ const y=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
+ return {x,y};
+}
+
+function start(e){
+ drawing=true;
+ const p=getPos(e);
+ lastX=p.x; lastY=p.y;
+ ctx.beginPath();
+ ctx.moveTo(lastX,lastY);
+}
+
+function move(e){
+ if(!drawing) return;
+ e.preventDefault();
+ const p=getPos(e);
+ ctx.lineTo(p.x,p.y);
+ ctx.stroke();
+ lastX=p.x; lastY=p.y;
+}
+
+function end(){drawing=false;}
+
+canvas.addEventListener("pointerdown",start);
+canvas.addEventListener("pointermove",move);
+canvas.addEventListener("pointerup",end);
+canvas.addEventListener("touchstart",start,{passive:false});
+canvas.addEventListener("touchmove",move,{passive:false});
+canvas.addEventListener("touchend",end);
+
+function limparAssinatura(){
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+}
+
+// ===== FOTOS =====
+let imagens=[];
+fotos.onchange=e=>{
+ imagens=[];
+ preview.innerHTML="";
+ [...e.target.files].forEach(f=>{
+  const r=new FileReader();
+  r.onload=x=>{
+   imagens.push(x.target.result);
+   const img=document.createElement("img");
+   img.src=x.target.result;
+   preview.appendChild(img);
+  };
+  r.readAsDataURL(f);
+ });
+};
+
+// ===== PDF =====
+function gerarPDF(){
+ if(!instalacao.value||!municipio.value||!os.value||!resumo.value||!responsavel.value){
+  alert("Preencha todos os campos obrigatórios (*)");
+  return;
+ }
+ if(imagens.length===0){
+  alert("É obrigatório anexar ao menos uma foto");
+  return;
+ }
+
+ const {jsPDF}=window.jspdf;
+ const doc=new jsPDF();
+
+ // Cabeçalho
+ doc.setFontSize(12);
+ doc.text("RP ENGENHARIA / SABESP",105,12,{align:"center"});
+ doc.setFontSize(14);
+ doc.text("ORDEM DE MANUTENÇÃO",105,20,{align:"center"});
+
+ doc.autoTable({
+  startY:28,
+  head:[["Campo","Informação"]],
+  body:[
+   ["Instalação",instalacao.value],
+   ["Município",municipio.value],
+   ["OS SAP",os.value],
+   ["Data / Hora",`${data.value} ${hora.value}`],
+   ["Tipo",tipo.value],
+   ["APR / LPE / PET",`${apr.value} | ${lpe.value} | ${pet.value}`],
+   ["Equipe",`${eletricista.value} / ${mecanico.value}`],
+   ["Grupo Parado",parado.value],
+   ["Grupo / Horário",`${grupo.value||"-"} ${p_inicio.value||""}-${p_fim.value||""}`],
+   ["Ocorrência",ocorrencia.value],
+   ["Resumo",resumo.value],
+   ["Serviço Realizado",realizado.value],
+   ["Materiais",`${mat_desc.value} | ${mat_qtd.value} | ${mat_forn.value}`],
+   ["Concluído",concluido.value]
+  ],
+  styles:{fontSize:9}
+ });
+
+ // Assinatura
+ let y=doc.lastAutoTable.finalY+10;
+ doc.text("Assinatura:",10,y);
+ doc.addImage(canvas.toDataURL(),"PNG",10,y+4,60,20);
+
+ // Fotos
+ doc.addPage();
+ doc.text("Registro Fotográfico",10,15);
+ let x=10,yy=25;
+ imagens.forEach(img=>{
+  doc.addImage(img,"JPEG",x,yy,60,45);
+  x+=70;
+  if(x>150){x=10;yy+=55;}
+  if(yy>250){doc.addPage();x=10;yy=20;}
+ });
+
+ // Rodapé
+ const pages=doc.getNumberOfPages();
+ for(let i=1;i<=pages;i++){
+  doc.setPage(i);
+  doc.setFontSize(8);
+  doc.text(`Responsável: ${responsavel.value}`,10,290);
+ }
+
+ const d=new Date();
+ const nome=`OM_RP_${d.toISOString().slice(0,10)}_${d.toTimeString().slice(0,5).replace(":","-")}_OS${os.value}.pdf`;
+ doc.save(nome);
+}
+
+// ===== WHATSAPP =====
+function enviarWhats(){
+ const equipe = eletricista.value || mecanico.value || "Equipe não informada";
+ const msg =
+`Serviço: ${resumo.value}
+OS SAP: ${os.value}
+Equipe: ${equipe}`;
+
+ window.open("https://wa.me/551196732498?text="+encodeURIComponent(msg));
+}
+</script>
+
+</body>
+</html>
