@@ -9,12 +9,51 @@
 body{font-family:Arial;background:#eef2f6;margin:0;padding:10px}
 .container{max-width:1100px;margin:auto;background:#fff;padding:15px;border-radius:12px}
 h2{background:#0b3d91;color:#fff;padding:8px;border-radius:6px;font-size:16px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
-input,select,textarea{width:100%;padding:8px;border-radius:6px;border:1px solid #aaa}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+}
+@media(max-width:768px){
+  .grid{grid-template-columns:1fr;}
+}
+
+input,select,textarea{
+  width:100%;
+  padding:8px;
+  border-radius:6px;
+  border:1px solid #aaa;
+}
 textarea{min-height:60px}
-button{width:100%;margin-top:10px;background:#0b3d91;color:#fff;border:none;padding:12px;border-radius:8px;font-size:16px}
-canvas{border:1px solid #333;border-radius:6px;width:100%;height:130px;touch-action:none}
-.photo-preview img{height:70px;margin:4px;border-radius:6px;border:1px solid #ccc}
+
+button{
+  width:100%;
+  margin-top:10px;
+  background:#0b3d91;
+  color:#fff;
+  border:none;
+  padding:12px;
+  border-radius:8px;
+  font-size:16px;
+}
+
+canvas{
+  border:1px solid #333;
+  border-radius:8px;
+  width:100%;
+  height:180px;
+  background:#fff;
+  touch-action:none;
+}
+
+.photo-preview img{
+  height:70px;
+  margin:4px;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+
 .logo{max-width:180px;margin-bottom:10px}
 </style>
 </head>
@@ -33,58 +72,57 @@ canvas{border:1px solid #333;border-radius:6px;width:100%;height:130px;touch-act
 <input type="time" id="hora">
 </div>
 
-<label>Tipo de Manutenção</label>
-<select id="tipo">
-<option>Corretiva Emergencial</option>
-<option>Corretiva Programada</option>
-<option>Sob Condições</option>
-</select>
-
-<h2>Segurança</h2>
+<h2>Segurança (obrigatório)</h2>
 <div class="grid">
-<select id="apr"><option>APR - Sim</option><option>APR - Não</option></select>
-<select id="lpe"><option>LPE - Sim</option><option>LPE - Não</option></select>
-<select id="pet"><option>PET - Sim</option><option>PET - Não</option></select>
+<select id="apr"><option value="">APR?</option><option>Sim</option><option>Não</option></select>
+<select id="lpe"><option value="">LPE?</option><option>Sim</option><option>Não</option></select>
+<select id="pet"><option value="">PET?</option><option>Sim</option><option>Não</option></select>
 </div>
 
 <h2>Equipe</h2>
 <div class="grid">
-<input id="eletricista" placeholder="Eletricista">
-<input type="time" id="e_inicio">
-<input type="time" id="e_fim">
-<input id="mecanico" placeholder="Mecânico">
-<input type="time" id="m_inicio">
-<input type="time" id="m_fim">
+<input id="nome1" placeholder="Nome 1">
+<input id="nome2" placeholder="Nome 2">
+<input id="nome3" placeholder="Nome 3">
+<input id="nome4" placeholder="Nome 4">
 </div>
 
-<h2>Estação / Grupo Parado</h2>
-<select id="parado" onchange="detalhesParado.style.display=this.value==='Sim'?'block':'none'">
-<option>Não</option>
-<option>Sim</option>
-</select>
+<h2>Grupo Parado</h2>
 
-<div id="detalhesParado" style="display:none">
-<input id="grupo" placeholder="Grupo / Estação">
-<input type="time" id="p_inicio">
-<input type="time" id="p_fim">
+<div class="grid">
+<input id="g1" placeholder="Grupo 1">
+<input type="time" id="g1_inicio">
+<input type="time" id="g1_fim">
+<input id="g1_total" placeholder="Total (h)" readonly>
+</div>
+
+<div class="grid">
+<input id="g2" placeholder="Grupo 2">
+<input type="time" id="g2_inicio">
+<input type="time" id="g2_fim">
+<input id="g2_total" placeholder="Total (h)" readonly>
+</div>
+
+<div class="grid">
+<input id="g3" placeholder="Grupo 3">
+<input type="time" id="g3_inicio">
+<input type="time" id="g3_fim">
+<input id="g3_total" placeholder="Total (h)" readonly>
+</div>
+
+<div class="grid">
+<input id="g4" placeholder="Grupo 4">
+<input type="time" id="g4_inicio">
+<input type="time" id="g4_fim">
+<input id="g4_total" placeholder="Total (h)" readonly>
 </div>
 
 <h2>Serviços</h2>
+<textarea id="resumo" placeholder="Situação encontrada *"></textarea>
 <textarea id="ocorrencia" placeholder="Ocorrência"></textarea>
-<textarea id="resumo" placeholder="Resumo do serviço *"></textarea>
 <textarea id="realizado" placeholder="Serviço realizado"></textarea>
 
-<label>Serviço Concluído</label>
-<select id="concluido"><option>Sim</option><option>Não</option></select>
-
-<h2>Materiais</h2>
-<div class="grid">
-<input id="mat_desc" placeholder="Descrição">
-<input id="mat_qtd" placeholder="Quantidade">
-<input id="mat_forn" placeholder="Fornecedor">
-</div>
-
-<h2>Fotos do Serviço (obrigatório)</h2>
+<h2>Fotos (obrigatório)</h2>
 <input type="file" id="fotos" multiple accept="image/*">
 <div class="photo-preview" id="preview"></div>
 
@@ -93,7 +131,7 @@ canvas{border:1px solid #333;border-radius:6px;width:100%;height:130px;touch-act
 
 <h2>Assinatura</h2>
 <canvas id="sign"></canvas>
-<button onclick="limparAssinatura()">Limpar Assinatura</button>
+<button onclick="limparAssinatura()">Limpar assinatura</button>
 
 <button onclick="gerarPDF()">💾 SALVAR PDF</button>
 <button onclick="enviarWhats()">📲 ENVIAR WHATSAPP</button>
@@ -104,52 +142,36 @@ canvas{border:1px solid #333;border-radius:6px;width:100%;height:130px;touch-act
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 
 <script>
-// ===== ASSINATURA SUAVE MOBILE =====
+// ===== ASSINATURA =====
 const canvas=document.getElementById("sign");
 const ctx=canvas.getContext("2d");
-canvas.width=canvas.offsetWidth;
-canvas.height=canvas.offsetHeight;
-ctx.lineWidth=2; ctx.lineCap="round";
 
-let drawing=false;
-let lastX=0,lastY=0;
-
-function getPos(e){
- const r=canvas.getBoundingClientRect();
- const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
- const y=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
- return {x,y};
+function resizeCanvas(){
+ const r=window.devicePixelRatio||1;
+ canvas.width=canvas.offsetWidth*r;
+ canvas.height=canvas.offsetHeight*r;
+ ctx.setTransform(r,0,0,r,0,0);
+ ctx.lineWidth=2;
+ ctx.lineCap="round";
 }
+resizeCanvas();
 
-function start(e){
- drawing=true;
- const p=getPos(e);
- lastX=p.x; lastY=p.y;
- ctx.beginPath();
- ctx.moveTo(lastX,lastY);
+let draw=false;
+function pos(e){
+ const b=canvas.getBoundingClientRect();
+ return {
+  x:(e.touches?e.touches[0].clientX:e.clientX)-b.left,
+  y:(e.touches?e.touches[0].clientY:e.clientY)-b.top
+ };
 }
+canvas.addEventListener("mousedown",e=>{draw=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);});
+canvas.addEventListener("mousemove",e=>{if(draw){const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();}});
+canvas.addEventListener("mouseup",()=>draw=false);
+canvas.addEventListener("touchstart",e=>{draw=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);},{passive:false});
+canvas.addEventListener("touchmove",e=>{if(draw){e.preventDefault();const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();}},{passive:false});
+canvas.addEventListener("touchend",()=>draw=false);
 
-function move(e){
- if(!drawing) return;
- e.preventDefault();
- const p=getPos(e);
- ctx.lineTo(p.x,p.y);
- ctx.stroke();
- lastX=p.x; lastY=p.y;
-}
-
-function end(){drawing=false;}
-
-canvas.addEventListener("pointerdown",start);
-canvas.addEventListener("pointermove",move);
-canvas.addEventListener("pointerup",end);
-canvas.addEventListener("touchstart",start,{passive:false});
-canvas.addEventListener("touchmove",move,{passive:false});
-canvas.addEventListener("touchend",end);
-
-function limparAssinatura(){
- ctx.clearRect(0,0,canvas.width,canvas.height);
-}
+function limparAssinatura(){ctx.clearRect(0,0,canvas.width,canvas.height);}
 
 // ===== FOTOS =====
 let imagens=[];
@@ -160,62 +182,71 @@ fotos.onchange=e=>{
   const r=new FileReader();
   r.onload=x=>{
    imagens.push(x.target.result);
-   const img=document.createElement("img");
-   img.src=x.target.result;
-   preview.appendChild(img);
+   const i=document.createElement("img");
+   i.src=x.target.result;
+   preview.appendChild(i);
   };
   r.readAsDataURL(f);
  });
 };
 
+// ===== TEMPO =====
+function calc(i,f){
+ if(!i||!f)return"";
+ let [hi,mi]=i.split(":").map(Number);
+ let [hf,mf]=f.split(":").map(Number);
+ let t=(hf*60+mf)-(hi*60+mi);
+ if(t<0)t+=1440;
+ return (t/60).toFixed(2);
+}
+["1","2","3","4"].forEach(n=>{
+ ["inicio","fim"].forEach(k=>{
+  document.getElementById(`g${n}_${k}`).addEventListener("change",()=>{
+   document.getElementById(`g${n}_total`).value=
+   calc(
+    document.getElementById(`g${n}_inicio`).value,
+    document.getElementById(`g${n}_fim`).value
+   );
+  });
+ });
+});
+
 // ===== PDF =====
 function gerarPDF(){
- if(!instalacao.value||!municipio.value||!os.value||!resumo.value||!responsavel.value){
-  alert("Preencha todos os campos obrigatórios (*)");
-  return;
- }
- if(imagens.length===0){
-  alert("É obrigatório anexar ao menos uma foto");
+ if(!instalacao.value||!municipio.value||!os.value||!resumo.value||
+ !responsavel.value||!apr.value||!lpe.value||!pet.value||imagens.length===0){
+  alert("Preencha todos os campos obrigatórios");
   return;
  }
 
  const {jsPDF}=window.jspdf;
  const doc=new jsPDF();
 
- // Cabeçalho
- doc.setFontSize(12);
- doc.text("RP ENGENHARIA / SABESP",105,12,{align:"center"});
- doc.setFontSize(14);
- doc.text("ORDEM DE MANUTENÇÃO",105,20,{align:"center"});
+ doc.text("ORDEM DE MANUTENÇÃO - RP ENGENHARIA",105,15,{align:"center"});
 
  doc.autoTable({
-  startY:28,
+  startY:25,
   head:[["Campo","Informação"]],
   body:[
    ["Instalação",instalacao.value],
    ["Município",municipio.value],
    ["OS SAP",os.value],
-   ["Data / Hora",`${data.value} ${hora.value}`],
-   ["Tipo",tipo.value],
-   ["APR / LPE / PET",`${apr.value} | ${lpe.value} | ${pet.value}`],
-   ["Equipe",`${eletricista.value} / ${mecanico.value}`],
-   ["Grupo Parado",parado.value],
-   ["Grupo / Horário",`${grupo.value||"-"} ${p_inicio.value||""}-${p_fim.value||""}`],
+   ["Segurança",`APR:${apr.value} | LPE:${lpe.value} | PET:${pet.value}`],
+   ["Equipe",[nome1.value,nome2.value,nome3.value,nome4.value].filter(Boolean).join(", ")],
+   ["Grupo 1",`${g1.value} | ${g1_inicio.value} - ${g1_fim.value} | ${g1_total.value} h`],
+   ["Grupo 2",`${g2.value} | ${g2_inicio.value} - ${g2_fim.value} | ${g2_total.value} h`],
+   ["Grupo 3",`${g3.value} | ${g3_inicio.value} - ${g3_fim.value} | ${g3_total.value} h`],
+   ["Grupo 4",`${g4.value} | ${g4_inicio.value} - ${g4_fim.value} | ${g4_total.value} h`],
+   ["Situação encontrada",resumo.value],
    ["Ocorrência",ocorrencia.value],
-   ["Resumo",resumo.value],
-   ["Serviço Realizado",realizado.value],
-   ["Materiais",`${mat_desc.value} | ${mat_qtd.value} | ${mat_forn.value}`],
-   ["Concluído",concluido.value]
-  ],
-  styles:{fontSize:9}
+   ["Serviço realizado",realizado.value]
+  ]
  });
 
- // Assinatura
  let y=doc.lastAutoTable.finalY+10;
  doc.text("Assinatura:",10,y);
- doc.addImage(canvas.toDataURL(),"PNG",10,y+4,60,20);
+ doc.addImage(canvas.toDataURL("image/png"),"PNG",10,y+5,70,30);
 
- // Fotos
  doc.addPage();
  doc.text("Registro Fotográfico",10,15);
  let x=10,yy=25;
@@ -223,30 +254,19 @@ function gerarPDF(){
   doc.addImage(img,"JPEG",x,yy,60,45);
   x+=70;
   if(x>150){x=10;yy+=55;}
-  if(yy>250){doc.addPage();x=10;yy=20;}
  });
 
- // Rodapé
- const pages=doc.getNumberOfPages();
- for(let i=1;i<=pages;i++){
-  doc.setPage(i);
-  doc.setFontSize(8);
-  doc.text(`Responsável: ${responsavel.value}`,10,290);
- }
+ // ===== NOME AUTOMÁTICO DO ARQUIVO =====
+ const agora = new Date();
+ const data = agora.toISOString().slice(0,10);
+ const hora = agora.toTimeString().slice(0,5).replace(":","-");
 
- const d=new Date();
- const nome=`OM_RP_${d.toISOString().slice(0,10)}_${d.toTimeString().slice(0,5).replace(":","-")}_OS${os.value}.pdf`;
- doc.save(nome);
+ doc.save(`OM_RP_${data}_${hora}_OS${os.value}.pdf`);
 }
 
-// ===== WHATSAPP =====
+// ===== WHATS =====
 function enviarWhats(){
- const equipe = eletricista.value || mecanico.value || "Equipe não informada";
- const msg =
-`Serviço: ${resumo.value}
-OS SAP: ${os.value}
-Equipe: ${equipe}`;
-
+ const msg=`OS ${os.value} - ${resumo.value}`;
  window.open("https://wa.me/5511916732498?text="+encodeURIComponent(msg));
 }
 </script>
