@@ -8,6 +8,15 @@
 <style>
 body{font-family:Arial;background:#eef2f6;margin:0;padding:10px}
 .container{max-width:1100px;margin:auto;background:#fff;padding:15px;border-radius:12px}
+
+.topo-img{
+  width:100%;
+  max-height:120px;
+  object-fit:contain;
+  display:block;
+  margin-bottom:10px;
+}
+
 h2{background:#0b3d91;color:#fff;padding:8px;border-radius:6px;font-size:16px}
 
 .grid{
@@ -19,11 +28,20 @@ h2{background:#0b3d91;color:#fff;padding:8px;border-radius:6px;font-size:16px}
   .grid{grid-template-columns:1fr;}
 }
 
+.campo{
+  display:flex;
+  flex-direction:column;
+  font-size:13px;
+  font-weight:bold;
+}
+.campo span{margin-bottom:2px;color:#0b3d91;}
+
 input,select,textarea{
   width:100%;
   padding:8px;
   border-radius:6px;
   border:1px solid #aaa;
+  font-weight:normal;
 }
 textarea{min-height:60px}
 
@@ -36,6 +54,7 @@ button{
   padding:12px;
   border-radius:8px;
   font-size:16px;
+  cursor:pointer;
 }
 
 canvas{
@@ -54,87 +73,94 @@ canvas{
   border:1px solid #ccc;
 }
 
-.logo{max-width:180px;margin-bottom:10px}
+.nota{
+  font-size:12px;
+  color:#444;
+  margin-top:8px;
+}
 </style>
 </head>
 
 <body>
 <div class="container">
 
-<img src="RP.jpg" class="logo">
+<img src="RP.jpg" class="topo-img" alt="RP Engenharia">
 
 <h2>Dados Gerais</h2>
 <div class="grid">
-<input id="instalacao" placeholder="Instalação *">
-<input id="municipio" placeholder="Município *">
-<input id="os" placeholder="OS SAP *">
-<input type="date" id="data">
-<input type="time" id="hora">
+  <div class="campo"><span>Instalação *</span><input id="instalacao"></div>
+  <div class="campo"><span>Município *</span><input id="municipio"></div>
+  <div class="campo"><span>OS SAP *</span><input id="os"></div>
+  <div class="campo"><span>Data</span><input type="date" id="data"></div>
+  <div class="campo"><span>Hora</span><input type="time" id="hora"></div>
 </div>
 
-<h2>Segurança (obrigatório)</h2>
+<h2>Atividade necessita de:</h2>
 <div class="grid">
-<select id="apr"><option value="">APR?</option><option>Sim</option><option>Não</option></select>
-<select id="lpe"><option value="">LPE?</option><option>Sim</option><option>Não</option></select>
-<select id="pet"><option value="">PET?</option><option>Sim</option><option>Não</option></select>
+  <div class="campo"><span>APR</span><select id="apr"><option value="">Selecione</option><option>Sim</option><option>Não</option></select></div>
+  <div class="campo"><span>LPE</span><select id="lpe"><option value="">Selecione</option><option>Sim</option><option>Não</option></select></div>
+  <div class="campo"><span>PET</span><select id="pet"><option value="">Selecione</option><option>Sim</option><option>Não</option></select></div>
 </div>
 
 <h2>Equipe</h2>
 <div class="grid">
-<input id="nome1" placeholder="Nome 1">
-<input id="nome2" placeholder="Nome 2">
-<input id="nome3" placeholder="Nome 3">
-<input id="nome4" placeholder="Nome 4">
+  <div class="campo"><span>Nome 1</span><input id="nome1"></div>
+  <div class="campo"><span>Nome 2</span><input id="nome2"></div>
+  <div class="campo"><span>Nome 3</span><input id="nome3"></div>
+  <div class="campo"><span>Nome 4</span><input id="nome4"></div>
 </div>
 
-<h2>Grupo Parado</h2>
-
-<div class="grid">
-<input id="g1" placeholder="Grupo 1">
-<input type="time" id="g1_inicio">
-<input type="time" id="g1_fim">
-<input id="g1_total" placeholder="Total (h)" readonly>
+<h2>Estação / Grupo</h2>
+<div class="campo">
+  <span>Estação/Grupo permaneceu desligado ou indisponível durante a manutenção?</span>
+  <select id="grupo_status">
+    <option value="">Selecione</option>
+    <option>Não</option>
+    <option>Sim</option>
+  </select>
 </div>
 
-<div class="grid">
-<input id="g2" placeholder="Grupo 2">
-<input type="time" id="g2_inicio">
-<input type="time" id="g2_fim">
-<input id="g2_total" placeholder="Total (h)" readonly>
+<div id="grupo_select_box" style="display:none;">
+  <div class="campo">
+    <span>Selecionar Grupo</span>
+    <select id="grupo_num">
+      <option value="">Selecione</option>
+      <option>Grupo 1</option>
+      <option>Grupo 2</option>
+      <option>Grupo 3</option>
+      <option>Grupo 4</option>
+    </select>
+  </div>
 </div>
 
-<div class="grid">
-<input id="g3" placeholder="Grupo 3">
-<input type="time" id="g3_inicio">
-<input type="time" id="g3_fim">
-<input id="g3_total" placeholder="Total (h)" readonly>
-</div>
-
-<div class="grid">
-<input id="g4" placeholder="Grupo 4">
-<input type="time" id="g4_inicio">
-<input type="time" id="g4_fim">
-<input id="g4_total" placeholder="Total (h)" readonly>
+<div id="tempo_grupo_box" class="grid" style="display:none;">
+  <div class="campo"><span>Hora Início</span><input type="time" id="g_inicio"></div>
+  <div class="campo"><span>Hora Fim</span><input type="time" id="g_fim"></div>
+  <div class="campo"><span>Total (h)</span><input id="g_total" readonly></div>
 </div>
 
 <h2>Serviços</h2>
-<textarea id="resumo" placeholder="Situação encontrada *"></textarea>
-<textarea id="ocorrencia" placeholder="Ocorrência"></textarea>
-<textarea id="realizado" placeholder="Serviço realizado"></textarea>
+<div class="campo"><span>Situação encontrada *</span><textarea id="resumo"></textarea></div>
+<div class="campo"><span>Ocorrência</span><textarea id="ocorrencia"></textarea></div>
+<div class="campo"><span>Serviço realizado</span><textarea id="realizado"></textarea></div>
 
 <h2>Fotos (obrigatório)</h2>
 <input type="file" id="fotos" multiple accept="image/*">
 <div class="photo-preview" id="preview"></div>
 
 <h2>Responsável</h2>
-<input id="responsavel" placeholder="Nome do responsável *">
+<div class="campo"><span>Nome do responsável *</span><input id="responsavel"></div>
 
 <h2>Assinatura</h2>
 <canvas id="sign"></canvas>
-<button onclick="limparAssinatura()">Limpar assinatura</button>
+<button type="button" onclick="limparAssinatura()">Limpar assinatura</button>
 
-<button onclick="gerarPDF()">💾 SALVAR PDF</button>
-<button onclick="enviarWhats()">📲 ENVIAR WHATSAPP</button>
+<button type="button" onclick="gerarPDF()">💾 SALVAR PDF</button>
+<button type="button" onclick="enviarWhats()">📲 ENVIAR WHATSAPP</button>
+
+<div class="nota">
+  * No celular, o envio tenta anexar o PDF automaticamente via compartilhamento. No PC, o WhatsApp abre com a mensagem pronta e o anexo é manual (limitação do WhatsApp Web).
+</div>
 
 </div>
 
@@ -142,132 +168,352 @@ canvas{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 
 <script>
-// ===== ASSINATURA =====
-const canvas=document.getElementById("sign");
-const ctx=canvas.getContext("2d");
+// ========= CONFIG =========
+const WHATS_PHONE = "5511981374513"; // troque aqui
 
-function resizeCanvas(){
- const r=window.devicePixelRatio||1;
- canvas.width=canvas.offsetWidth*r;
- canvas.height=canvas.offsetHeight*r;
- ctx.setTransform(r,0,0,r,0,0);
- ctx.lineWidth=2;
- ctx.lineCap="round";
+// ========= NOME DO ARQUIVO (DATA+HORA) =========
+function dataHoraArquivo(){
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  const hh = String(d.getHours()).padStart(2,"0");
+  const mi = String(d.getMinutes()).padStart(2,"0");
+  return `${yyyy}${mm}${dd}_${hh}${mi}`;
 }
-resizeCanvas();
-
-let draw=false;
-function pos(e){
- const b=canvas.getBoundingClientRect();
- return {
-  x:(e.touches?e.touches[0].clientX:e.clientX)-b.left,
-  y:(e.touches?e.touches[0].clientY:e.clientY)-b.top
- };
+function limparTextoArquivo(s){
+  return (s || "")
+    .toString()
+    .trim()
+    .replace(/[^\w\-]+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
 }
-canvas.addEventListener("mousedown",e=>{draw=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);});
-canvas.addEventListener("mousemove",e=>{if(draw){const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();}});
-canvas.addEventListener("mouseup",()=>draw=false);
-canvas.addEventListener("touchstart",e=>{draw=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);},{passive:false});
-canvas.addEventListener("touchmove",e=>{if(draw){e.preventDefault();const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();}},{passive:false});
-canvas.addEventListener("touchend",()=>draw=false);
 
-function limparAssinatura(){ctx.clearRect(0,0,canvas.width,canvas.height);}
-
-// ===== FOTOS =====
-let imagens=[];
-fotos.onchange=e=>{
- imagens=[];
- preview.innerHTML="";
- [...e.target.files].forEach(f=>{
-  const r=new FileReader();
-  r.onload=x=>{
-   imagens.push(x.target.result);
-   const i=document.createElement("img");
-   i.src=x.target.result;
-   preview.appendChild(i);
-  };
-  r.readAsDataURL(f);
- });
-};
-
-// ===== TEMPO =====
-function calc(i,f){
- if(!i||!f)return"";
- let [hi,mi]=i.split(":").map(Number);
- let [hf,mf]=f.split(":").map(Number);
- let t=(hf*60+mf)-(hi*60+mi);
- if(t<0)t+=1440;
- return (t/60).toFixed(2);
+// ========= GRUPO (alteração correta) =========
+function limparGrupoETempo(){
+  grupo_num.value = "";
+  g_inicio.value = "";
+  g_fim.value = "";
+  g_total.value = "";
+  tempo_grupo_box.style.display = "none";
 }
-["1","2","3","4"].forEach(n=>{
- ["inicio","fim"].forEach(k=>{
-  document.getElementById(`g${n}_${k}`).addEventListener("change",()=>{
-   document.getElementById(`g${n}_total`).value=
-   calc(
-    document.getElementById(`g${n}_inicio`).value,
-    document.getElementById(`g${n}_fim`).value
-   );
-  });
- });
+
+grupo_status.addEventListener("change", () => {
+  const sim = grupo_status.value === "Sim";
+  grupo_select_box.style.display = sim ? "block" : "none";
+  limparGrupoETempo(); // sempre reseta ao trocar status
 });
 
-// ===== PDF =====
-function gerarPDF(){
- if(!instalacao.value||!municipio.value||!os.value||!resumo.value||
- !responsavel.value||!apr.value||!lpe.value||!pet.value||imagens.length===0){
-  alert("Preencha todos os campos obrigatórios");
-  return;
- }
+grupo_num.addEventListener("change", () => {
+  const liberar = (grupo_status.value === "Sim" && !!grupo_num.value);
+  tempo_grupo_box.style.display = liberar ? "grid" : "none";
+  if(!liberar){
+    g_inicio.value = "";
+    g_fim.value = "";
+    g_total.value = "";
+  }
+});
 
- const {jsPDF}=window.jspdf;
- const doc=new jsPDF();
+// ========= CÁLCULO TEMPO =========
+function calc(i,f){
+  if(!i||!f)return"";
+  let [hi,mi]=i.split(":").map(Number);
+  let [hf,mf]=f.split(":").map(Number);
+  let t=(hf*60+mf)-(hi*60+mi);
+  if(t<0)t+=1440;
+  return (t/60).toFixed(2);
+}
+g_inicio.onchange=g_fim.onchange=()=>{
+  g_total.value=calc(g_inicio.value,g_fim.value);
+};
 
- doc.text("ORDEM DE MANUTENÇÃO - RP ENGENHARIA",105,15,{align:"center"});
+// ========= ASSINATURA (MOUSE + TOUCH) =========
+const canvas = document.getElementById("sign");
+const ctx = canvas.getContext("2d");
 
- doc.autoTable({
-  startY:25,
-  head:[["Campo","Informação"]],
-  body:[
-   ["Instalação",instalacao.value],
-   ["Município",municipio.value],
-   ["OS SAP",os.value],
-   ["Segurança",`APR:${apr.value} | LPE:${lpe.value} | PET:${pet.value}`],
-   ["Equipe",[nome1.value,nome2.value,nome3.value,nome4.value].filter(Boolean).join(", ")],
-   ["Grupo 1",`${g1.value} | ${g1_inicio.value} - ${g1_fim.value} | ${g1_total.value} h`],
-   ["Grupo 2",`${g2.value} | ${g2_inicio.value} - ${g2_fim.value} | ${g2_total.value} h`],
-   ["Grupo 3",`${g3.value} | ${g3_inicio.value} - ${g3_fim.value} | ${g3_total.value} h`],
-   ["Grupo 4",`${g4.value} | ${g4_inicio.value} - ${g4_fim.value} | ${g4_total.value} h`],
-   ["Situação encontrada",resumo.value],
-   ["Ocorrência",ocorrencia.value],
-   ["Serviço realizado",realizado.value]
-  ]
- });
+function resizeCanvas(){
+  const r = window.devicePixelRatio || 1;
+  canvas.width = canvas.offsetWidth * r;
+  canvas.height = canvas.offsetHeight * r;
+  ctx.setTransform(r,0,0,r,0,0);
+  ctx.lineWidth = 2;
+  ctx.lineCap = "round";
+  ctx.strokeStyle = "#000";
+}
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
 
- let y=doc.lastAutoTable.finalY+10;
- doc.text("Assinatura:",10,y);
- doc.addImage(canvas.toDataURL("image/png"),"PNG",10,y+5,70,30);
+let desenhando = false;
 
- doc.addPage();
- doc.text("Registro Fotográfico",10,15);
- let x=10,yy=25;
- imagens.forEach(img=>{
-  doc.addImage(img,"JPEG",x,yy,60,45);
-  x+=70;
-  if(x>150){x=10;yy+=55;}
- });
-
- // ===== NOME AUTOMÁTICO DO ARQUIVO =====
- const agora = new Date();
- const data = agora.toISOString().slice(0,10);
- const hora = agora.toTimeString().slice(0,5).replace(":","-");
-
- doc.save(`OM_RP_${data}_${hora}_OS${os.value}.pdf`);
+function getPos(e){
+  const rect = canvas.getBoundingClientRect();
+  if(e.touches && e.touches[0]){
+    return [e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top];
+  }
+  return [e.clientX - rect.left, e.clientY - rect.top];
+}
+function startDraw(e){
+  e.preventDefault();
+  desenhando = true;
+  ctx.beginPath();
+  const [x,y] = getPos(e);
+  ctx.moveTo(x,y);
+}
+function moveDraw(e){
+  if(!desenhando) return;
+  e.preventDefault();
+  const [x,y] = getPos(e);
+  ctx.lineTo(x,y);
+  ctx.stroke();
+}
+function endDraw(){
+  desenhando = false;
 }
 
-// ===== WHATS =====
-function enviarWhats(){
- const msg=`OS ${os.value} - ${resumo.value}`;
- window.open("https://wa.me/5511916732498?text="+encodeURIComponent(msg));
+canvas.addEventListener("mousedown", startDraw);
+canvas.addEventListener("mousemove", moveDraw);
+canvas.addEventListener("mouseup", endDraw);
+canvas.addEventListener("mouseleave", endDraw);
+
+canvas.addEventListener("touchstart", startDraw, {passive:false});
+canvas.addEventListener("touchmove", moveDraw, {passive:false});
+canvas.addEventListener("touchend", endDraw);
+
+function limparAssinatura(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+}
+
+// ========= FOTOS =========
+let imagens = []; // {dataUrl, name}
+fotos.onchange = (e) => {
+  imagens = [];
+  preview.innerHTML = "";
+  [...e.target.files].forEach(file=>{
+    const r = new FileReader();
+    r.onload = (x)=>{
+      imagens.push({ dataUrl: x.target.result, name: file.name });
+      const im = document.createElement("img");
+      im.src = x.target.result;
+      preview.appendChild(im);
+    };
+    r.readAsDataURL(file);
+  });
+};
+
+// ========= HELPERS =========
+function isBlank(v){ return !v || !String(v).trim(); }
+
+async function fetchAsDataURL(url){
+  const res = await fetch(url);
+  const blob = await res.blob();
+  return await new Promise((resolve)=>{
+    const fr = new FileReader();
+    fr.onload = () => resolve(fr.result);
+    fr.readAsDataURL(blob);
+  });
+}
+
+function buildWhatsText(){
+  const parts = [];
+  parts.push("OM RP ENGENHARIA");
+  if(!isBlank(os.value)) parts.push(`OS: ${os.value}`);
+  if(!isBlank(instalacao.value)) parts.push(`Instalação: ${instalacao.value}`);
+  if(!isBlank(municipio.value)) parts.push(`Município: ${municipio.value}`);
+  if(!isBlank(data.value)) parts.push(`Data: ${data.value}`);
+  if(!isBlank(hora.value)) parts.push(`Hora: ${hora.value}`);
+
+  if(grupo_status.value === "Sim" && grupo_num.value){
+    parts.push(`Grupo indisponível: Sim (${grupo_num.value})`);
+    if(g_total.value) parts.push(`Tempo: ${g_total.value} h`);
+  } else if(grupo_status.value === "Não"){
+    parts.push("Grupo indisponível: Não");
+  }
+
+  if(!isBlank(resumo.value)) parts.push(`Situação: ${resumo.value}`);
+  if(!isBlank(responsavel.value)) parts.push(`Responsável: ${responsavel.value}`);
+  return parts.join("\n");
+}
+
+// ========= PDF (gera + retorna blob) =========
+async function gerarPDFBlob(){
+  // validação mínima (ajuste se quiser)
+  if(isBlank(instalacao.value) || isBlank(municipio.value) || isBlank(os.value) || isBlank(resumo.value) || isBlank(responsavel.value)){
+    alert("Preencha os campos obrigatórios: Instalação, Município, OS SAP, Situação encontrada e Responsável.");
+    throw new Error("Campos obrigatórios não preenchidos.");
+  }
+  if(imagens.length === 0){
+    alert("Inclua pelo menos 1 foto (obrigatório).");
+    throw new Error("Sem fotos.");
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: "mm", format: "a4", compress: true });
+
+  // logo
+  let logo = "";
+  try { logo = await fetchAsDataURL("RP.jpg"); } catch(e) {}
+
+  if(logo){
+    // tenta como JPEG e se falhar, cai como PNG
+    try { doc.addImage(logo, "JPEG", 10, 8, 55, 18); }
+    catch(e){ doc.addImage(logo, "PNG", 10, 8, 55, 18); }
+  }
+
+  doc.setFontSize(14);
+  doc.text("ORDEM DE MANUTENÇÃO - RP ENGENHARIA", 105, 18, { align: "center" });
+  doc.setFontSize(9);
+  doc.text("Desenvolvido por Lucas Moreira Rodrigues", 105, 24, { align: "center" });
+
+  // tabela dados
+  const equipe = [nome1.value, nome2.value, nome3.value, nome4.value].filter(v=>!isBlank(v)).join(" / ");
+  const dados = [
+    ["Instalação", instalacao.value],
+    ["Município", municipio.value],
+    ["OS SAP", os.value],
+    ["Data", data.value || ""],
+    ["Hora", hora.value || ""],
+    ["APR", apr.value || ""],
+    ["LPE", lpe.value || ""],
+    ["PET", pet.value || ""],
+    ["Equipe", equipe]
+  ];
+
+  if(grupo_status.value === "Sim"){
+    dados.push(["Grupo indisponível", "Sim"]);
+    dados.push(["Grupo", grupo_num.value || ""]);
+    dados.push(["Hora início", g_inicio.value || ""]);
+    dados.push(["Hora fim", g_fim.value || ""]);
+    dados.push(["Total (h)", g_total.value || ""]);
+  } else if(grupo_status.value === "Não"){
+    dados.push(["Grupo indisponível", "Não"]);
+  }
+
+  doc.autoTable({
+    startY: 30,
+    head: [["Campo", "Valor"]],
+    body: dados,
+    styles: { fontSize: 9, cellPadding: 2 },
+    headStyles: { fillColor: [11, 61, 145] },
+    theme: "grid"
+  });
+
+  let y = doc.lastAutoTable.finalY + 6;
+
+  // serviços
+  doc.setFontSize(11);
+  doc.text("Serviços", 10, y);
+  y += 4;
+
+  const blocos = [
+    ["Situação encontrada", resumo.value],
+    ["Ocorrência", ocorrencia.value || ""],
+    ["Serviço realizado", realizado.value || ""]
+  ];
+
+  doc.setFontSize(9);
+  for(const [tit, txt] of blocos){
+    doc.setFont(undefined, "bold");
+    doc.text(tit + ":", 10, y);
+    y += 4;
+    doc.setFont(undefined, "normal");
+
+    const lines = doc.splitTextToSize(txt || "", 190);
+    doc.text(lines, 10, y);
+    y += Math.max(6, lines.length * 4) + 2;
+
+    if(y > 250){
+      doc.addPage();
+      y = 20;
+    }
+  }
+
+  // responsável + assinatura
+  doc.setFont(undefined, "bold");
+  doc.text("Responsável: ", 10, y);
+  doc.setFont(undefined, "normal");
+  doc.text(responsavel.value, 35, y);
+  y += 8;
+
+  doc.setFont(undefined, "bold");
+  doc.text("Assinatura:", 10, y);
+  doc.setFont(undefined, "normal");
+  y += 2;
+
+  const signData = canvas.toDataURL("image/png");
+  doc.addImage(signData, "PNG", 10, y, 80, 30);
+  y += 38;
+
+  // fotos (página(s))
+  doc.setFont(undefined, "bold");
+  doc.text("Fotos", 10, y);
+  doc.setFont(undefined, "normal");
+  y += 4;
+
+  for(let i=0; i<imagens.length; i++){
+    if(y > 240){
+      doc.addPage();
+      y = 20;
+    }
+
+    doc.setFontSize(9);
+    doc.text(`Foto ${i+1}`, 10, y);
+    y += 2;
+
+    // insere foto (melhor compatibilidade como JPEG)
+    const imgData = imagens[i].dataUrl;
+    try {
+      doc.addImage(imgData, "JPEG", 10, y, 180, 90, undefined, "FAST");
+    } catch(e) {
+      // se não for JPEG, tenta PNG
+      doc.addImage(imgData, "PNG", 10, y, 180, 90);
+    }
+    y += 98;
+  }
+
+  const osSafe = limparTextoArquivo(os.value) || "SEM_OS";
+  const filename = `OM_${dataHoraArquivo()}_${osSafe}.pdf`;
+  const blob = doc.output("blob");
+  return { blob, filename, doc };
+}
+
+// ========= SALVAR PDF =========
+async function gerarPDF(){
+  const { blob, filename } = await gerarPDFBlob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+// ========= ENVIAR WHATS =========
+async function enviarWhats(){
+  const texto = buildWhatsText();
+  const { blob, filename } = await gerarPDFBlob();
+  const file = new File([blob], filename, { type: "application/pdf" });
+
+  // 1) Celular: tenta compartilhar com arquivo (WhatsApp aparece no menu)
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try{
+      await navigator.share({
+        title: "OM RP Engenharia",
+        text: texto,
+        files: [file]
+      });
+      return;
+    }catch(e){
+      // cancelado ou falhou -> fallback abaixo
+    }
+  }
+
+  // 2) Fallback (PC / sem share): baixa e abre mensagem no Whats
+  await gerarPDF();
+  const link = "https://wa.me/" + WHATS_PHONE + "?text=" + encodeURIComponent(texto + "\n\nPDF gerado: " + filename + "\n(Anexe o arquivo baixado aqui.)");
+  window.open(link, "_blank");
 }
 </script>
 
