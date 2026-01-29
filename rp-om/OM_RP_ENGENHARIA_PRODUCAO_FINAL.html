@@ -57,6 +57,13 @@ button{
   cursor:pointer;
 }
 
+.btn-sec{
+  background:#1d6fd8;
+}
+.btn-danger{
+  background:#b42318;
+}
+
 canvas{
   border:1px solid #333;
   border-radius:8px;
@@ -77,6 +84,26 @@ canvas{
   font-size:12px;
   color:#444;
   margin-top:8px;
+}
+
+.group-row{
+  display:grid;
+  grid-template-columns: 1.2fr 1fr 1fr 1fr 0.8fr;
+  gap:8px;
+  align-items:end;
+  margin-top:8px;
+}
+@media(max-width:768px){
+  .group-row{grid-template-columns:1fr;}
+}
+.group-row .remover{
+  height:38px;
+  margin-top:0;
+}
+.hr{
+  border:0;
+  border-top:1px solid #e4e7ec;
+  margin:10px 0;
 }
 </style>
 </head>
@@ -110,7 +137,7 @@ canvas{
   <div class="campo"><span>Nome 4</span><input id="nome4"></div>
 </div>
 
-<h2>Estação / Grupo</h2>
+<h2>Estação / Grupos</h2>
 <div class="campo">
   <span>Estação/Grupo permaneceu desligado ou indisponível durante a manutenção?</span>
   <select id="grupo_status">
@@ -120,23 +147,22 @@ canvas{
   </select>
 </div>
 
-<div id="grupo_select_box" style="display:none;">
+<div id="grupos_box" style="display:none; margin-top:10px;">
   <div class="campo">
-    <span>Selecionar Grupo</span>
-    <select id="grupo_num">
-      <option value="">Selecione</option>
-      <option>Grupo 1</option>
-      <option>Grupo 2</option>
-      <option>Grupo 3</option>
-      <option>Grupo 4</option>
-    </select>
+    <span>Grupos indisponíveis (adicione quantos forem necessários)</span>
+    <button type="button" class="btn-sec" id="btn_add_grupo">➕ Adicionar Grupo</button>
   </div>
-</div>
 
-<div id="tempo_grupo_box" class="grid" style="display:none;">
-  <div class="campo"><span>Hora Início</span><input type="time" id="g_inicio"></div>
-  <div class="campo"><span>Hora Fim</span><input type="time" id="g_fim"></div>
-  <div class="campo"><span>Total (h)</span><input id="g_total" readonly></div>
+  <div id="lista_grupos"></div>
+
+  <div class="hr"></div>
+
+  <div class="grid">
+    <div class="campo">
+      <span>Total Geral (h)</span>
+      <input id="g_total_geral" readonly>
+    </div>
+  </div>
 </div>
 
 <h2>Serviços</h2>
@@ -190,43 +216,110 @@ function limparTextoArquivo(s){
     .replace(/^_+|_+$/g, "");
 }
 
-// ========= GRUPO (alteração correta) =========
-function limparGrupoETempo(){
-  grupo_num.value = "";
-  g_inicio.value = "";
-  g_fim.value = "";
-  g_total.value = "";
-  tempo_grupo_box.style.display = "none";
+// ========= CÁLCULO TEMPO =========
+function calc(i,f){
+  if(!i||!f) return "";
+  let [hi,mi] = i.split(":").map(Number);
+  let [hf,mf] = f.split(":").map(Number);
+  let t = (hf*60+mf) - (hi*60+mi);
+  if(t < 0) t += 1440; // virada de dia
+  return (t/60).toFixed(2);
+}
+
+// ========= GRUPOS (MÚLTIPLOS) =========
+const gruposBox = document.getElementById("grupos_box");
+const listaGrupos = document.getElementById("lista_grupos");
+const totalGeral = document.getElementById("g_total_geral");
+const btnAddGrupo = document.getElementById("btn_add_grupo");
+
+function limparGrupos(){
+  listaGrupos.innerHTML = "";
+  totalGeral.value = "";
+}
+
+function somarTotais(){
+  let soma = 0;
+  const totals = listaGrupos.querySelectorAll('[data-role="total"]');
+  totals.forEach(inp=>{
+    const v = parseFloat((inp.value || "").replace(",", "."));
+    if(!isNaN(v)) soma += v;
+  });
+  totalGeral.value = soma ? soma.toFixed(2) : "";
+}
+
+function criarLinhaGrupo(){
+  const row = document.createElement("div");
+  row.className = "group-row";
+
+  row.innerHTML = `
+    <div class="campo">
+      <span>Grupo</span>
+      <select data-role="grupo">
+        <option value="">Selecione</option>
+        <option>Grupo 1</option>
+        <option>Grupo 2</option>
+        <option>Grupo 3</option>
+        <option>Grupo 4</option>
+      </select>
+    </div>
+
+    <div class="campo">
+      <span>Hora Início</span>
+      <input type="time" data-role="inicio">
+    </div>
+
+    <div class="campo">
+      <span>Hora Fim</span>
+      <input type="time" data-role="fim">
+    </div>
+
+    <div class="campo">
+      <span>Total (h)</span>
+      <input data-role="total" readonly>
+    </div>
+
+    <button type="button" class="btn-danger remover" data-role="remover">Remover</button>
+  `;
+
+  const selGrupo = row.querySelector('[data-role="grupo"]');
+  const inInicio = row.querySelector('[data-role="inicio"]');
+  const inFim = row.querySelector('[data-role="fim"]');
+  const inTotal = row.querySelector('[data-role="total"]');
+  const btnRemover = row.querySelector('[data-role="remover"]');
+
+  function atualizarTotalLinha(){
+    inTotal.value = calc(inInicio.value, inFim.value);
+    somarTotais();
+  }
+
+  inInicio.addEventListener("change", atualizarTotalLinha);
+  inFim.addEventListener("change", atualizarTotalLinha);
+
+  btnRemover.addEventListener("click", () => {
+    row.remove();
+    somarTotais();
+  });
+
+  listaGrupos.appendChild(row);
+  return row;
 }
 
 grupo_status.addEventListener("change", () => {
   const sim = grupo_status.value === "Sim";
-  grupo_select_box.style.display = sim ? "block" : "none";
-  limparGrupoETempo(); // sempre reseta ao trocar status
-});
-
-grupo_num.addEventListener("change", () => {
-  const liberar = (grupo_status.value === "Sim" && !!grupo_num.value);
-  tempo_grupo_box.style.display = liberar ? "grid" : "none";
-  if(!liberar){
-    g_inicio.value = "";
-    g_fim.value = "";
-    g_total.value = "";
+  gruposBox.style.display = sim ? "block" : "none";
+  if(!sim){
+    limparGrupos();
+  }else{
+    // se abriu e ainda não tem linha, cria 1
+    if(listaGrupos.children.length === 0){
+      criarLinhaGrupo();
+    }
   }
 });
 
-// ========= CÁLCULO TEMPO =========
-function calc(i,f){
-  if(!i||!f)return"";
-  let [hi,mi]=i.split(":").map(Number);
-  let [hf,mf]=f.split(":").map(Number);
-  let t=(hf*60+mf)-(hi*60+mi);
-  if(t<0)t+=1440;
-  return (t/60).toFixed(2);
-}
-g_inicio.onchange=g_fim.onchange=()=>{
-  g_total.value=calc(g_inicio.value,g_fim.value);
-};
+btnAddGrupo.addEventListener("click", () => {
+  criarLinhaGrupo();
+});
 
 // ========= ASSINATURA (MOUSE + TOUCH) =========
 const canvas = document.getElementById("sign");
@@ -314,6 +407,23 @@ async function fetchAsDataURL(url){
   });
 }
 
+function coletarGrupos(){
+  // retorna array [{grupo,inicio,fim,total}]
+  const rows = [...listaGrupos.querySelectorAll(".group-row")];
+  const out = [];
+  rows.forEach(r=>{
+    const grupo = r.querySelector('[data-role="grupo"]').value;
+    const inicio = r.querySelector('[data-role="inicio"]').value;
+    const fim = r.querySelector('[data-role="fim"]').value;
+    const total = r.querySelector('[data-role="total"]').value;
+    // só inclui se tiver grupo OU algum horário preenchido
+    if(grupo || inicio || fim || total){
+      out.push({grupo, inicio, fim, total});
+    }
+  });
+  return out;
+}
+
 function buildWhatsText(){
   const parts = [];
   parts.push("OM RP ENGENHARIA");
@@ -323,11 +433,26 @@ function buildWhatsText(){
   if(!isBlank(data.value)) parts.push(`Data: ${data.value}`);
   if(!isBlank(hora.value)) parts.push(`Hora: ${hora.value}`);
 
-  if(grupo_status.value === "Sim" && grupo_num.value){
-    parts.push(`Grupo indisponível: Sim (${grupo_num.value})`);
-    if(g_total.value) parts.push(`Tempo: ${g_total.value} h`);
+  if(grupo_status.value === "Sim"){
+    const gs = coletarGrupos();
+    parts.push(`Grupos indisponíveis: Sim`);
+    if(gs.length){
+      gs.forEach((g, idx)=>{
+        const linha = [
+          `#${idx+1}`,
+          g.grupo || "(sem grupo)",
+          g.inicio ? `Início ${g.inicio}` : "",
+          g.fim ? `Fim ${g.fim}` : "",
+          g.total ? `Total ${g.total} h` : ""
+        ].filter(Boolean).join(" - ");
+        parts.push(linha);
+      });
+      if(totalGeral.value) parts.push(`Total geral: ${totalGeral.value} h`);
+    }else{
+      parts.push("(nenhum grupo detalhado)");
+    }
   } else if(grupo_status.value === "Não"){
-    parts.push("Grupo indisponível: Não");
+    parts.push("Grupos indisponíveis: Não");
   }
 
   if(!isBlank(resumo.value)) parts.push(`Situação: ${resumo.value}`);
@@ -337,7 +462,6 @@ function buildWhatsText(){
 
 // ========= PDF (gera + retorna blob) =========
 async function gerarPDFBlob(){
-  // validação mínima (ajuste se quiser)
   if(isBlank(instalacao.value) || isBlank(municipio.value) || isBlank(os.value) || isBlank(resumo.value) || isBlank(responsavel.value)){
     alert("Preencha os campos obrigatórios: Instalação, Município, OS SAP, Situação encontrada e Responsável.");
     throw new Error("Campos obrigatórios não preenchidos.");
@@ -350,12 +474,10 @@ async function gerarPDFBlob(){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: "mm", format: "a4", compress: true });
 
-  // logo
   let logo = "";
   try { logo = await fetchAsDataURL("RP.jpg"); } catch(e) {}
 
   if(logo){
-    // tenta como JPEG e se falhar, cai como PNG
     try { doc.addImage(logo, "JPEG", 10, 8, 55, 18); }
     catch(e){ doc.addImage(logo, "PNG", 10, 8, 55, 18); }
   }
@@ -365,7 +487,6 @@ async function gerarPDFBlob(){
   doc.setFontSize(9);
   doc.text("Desenvolvido por Lucas Moreira Rodrigues", 105, 24, { align: "center" });
 
-  // tabela dados
   const equipe = [nome1.value, nome2.value, nome3.value, nome4.value].filter(v=>!isBlank(v)).join(" / ");
   const dados = [
     ["Instalação", instalacao.value],
@@ -379,14 +500,23 @@ async function gerarPDFBlob(){
     ["Equipe", equipe]
   ];
 
+  const gruposDetalhe = [];
   if(grupo_status.value === "Sim"){
-    dados.push(["Grupo indisponível", "Sim"]);
-    dados.push(["Grupo", grupo_num.value || ""]);
-    dados.push(["Hora início", g_inicio.value || ""]);
-    dados.push(["Hora fim", g_fim.value || ""]);
-    dados.push(["Total (h)", g_total.value || ""]);
+    dados.push(["Grupos indisponíveis", "Sim"]);
+    const gs = coletarGrupos();
+    if(gs.length){
+      gs.forEach((g, i)=>{
+        gruposDetalhe.push([
+          g.grupo || `Grupo (não informado)`,
+          g.inicio || "",
+          g.fim || "",
+          g.total || ""
+        ]);
+      });
+    }
+    if(totalGeral.value) dados.push(["Total geral (h)", totalGeral.value]);
   } else if(grupo_status.value === "Não"){
-    dados.push(["Grupo indisponível", "Não"]);
+    dados.push(["Grupos indisponíveis", "Não"]);
   }
 
   doc.autoTable({
@@ -400,7 +530,24 @@ async function gerarPDFBlob(){
 
   let y = doc.lastAutoTable.finalY + 6;
 
-  // serviços
+  // Se tiver detalhe de grupos, imprime tabela específica
+  if(gruposDetalhe.length){
+    doc.setFontSize(11);
+    doc.text("Detalhamento de Grupos Indisponíveis", 10, y);
+    y += 2;
+
+    doc.autoTable({
+      startY: y + 2,
+      head: [["Grupo", "Hora Início", "Hora Fim", "Total (h)"]],
+      body: gruposDetalhe,
+      styles: { fontSize: 9, cellPadding: 2 },
+      headStyles: { fillColor: [11, 61, 145] },
+      theme: "grid"
+    });
+    y = doc.lastAutoTable.finalY + 6;
+  }
+
+  // Serviços
   doc.setFontSize(11);
   doc.text("Serviços", 10, y);
   y += 4;
@@ -428,7 +575,7 @@ async function gerarPDFBlob(){
     }
   }
 
-  // responsável + assinatura
+  // Responsável + assinatura
   doc.setFont(undefined, "bold");
   doc.text("Responsável: ", 10, y);
   doc.setFont(undefined, "normal");
@@ -444,7 +591,7 @@ async function gerarPDFBlob(){
   doc.addImage(signData, "PNG", 10, y, 80, 30);
   y += 38;
 
-  // fotos (página(s))
+  // Fotos
   doc.setFont(undefined, "bold");
   doc.text("Fotos", 10, y);
   doc.setFont(undefined, "normal");
@@ -455,26 +602,21 @@ async function gerarPDFBlob(){
       doc.addPage();
       y = 20;
     }
-
     doc.setFontSize(9);
     doc.text(`Foto ${i+1}`, 10, y);
     y += 2;
 
-    // insere foto (melhor compatibilidade como JPEG)
     const imgData = imagens[i].dataUrl;
-    try {
-      doc.addImage(imgData, "JPEG", 10, y, 180, 90, undefined, "FAST");
-    } catch(e) {
-      // se não for JPEG, tenta PNG
-      doc.addImage(imgData, "PNG", 10, y, 180, 90);
-    }
+    try { doc.addImage(imgData, "JPEG", 10, y, 180, 90, undefined, "FAST"); }
+    catch(e){ doc.addImage(imgData, "PNG", 10, y, 180, 90); }
+
     y += 98;
   }
 
   const osSafe = limparTextoArquivo(os.value) || "SEM_OS";
   const filename = `OM_${dataHoraArquivo()}_${osSafe}.pdf`;
   const blob = doc.output("blob");
-  return { blob, filename, doc };
+  return { blob, filename };
 }
 
 // ========= SALVAR PDF =========
@@ -496,7 +638,6 @@ async function enviarWhats(){
   const { blob, filename } = await gerarPDFBlob();
   const file = new File([blob], filename, { type: "application/pdf" });
 
-  // 1) Celular: tenta compartilhar com arquivo (WhatsApp aparece no menu)
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try{
       await navigator.share({
@@ -505,14 +646,13 @@ async function enviarWhats(){
         files: [file]
       });
       return;
-    }catch(e){
-      // cancelado ou falhou -> fallback abaixo
-    }
+    }catch(e){}
   }
 
-  // 2) Fallback (PC / sem share): baixa e abre mensagem no Whats
   await gerarPDF();
-  const link = "https://wa.me/" + WHATS_PHONE + "?text=" + encodeURIComponent(texto + "\n\nPDF gerado: " + filename + "\n(Anexe o arquivo baixado aqui.)");
+  const link = "https://wa.me/" + WHATS_PHONE + "?text=" + encodeURIComponent(
+    texto + "\n\nPDF gerado: " + filename + "\n(Anexe o arquivo baixado aqui.)"
+  );
   window.open(link, "_blank");
 }
 </script>
