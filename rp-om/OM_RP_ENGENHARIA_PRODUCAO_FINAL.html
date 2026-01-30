@@ -22,7 +22,6 @@ button{width:100%;margin-top:10px;background:#0b3d91;color:#fff;border:none;padd
 canvas{border:1px solid #333;border-radius:8px;width:100%;height:180px;background:#fff;touch-action:none}
 .photo-preview img{height:70px;margin:4px;border-radius:6px;border:1px solid #ccc}
 .nota{font-size:12px;color:#444;margin-top:8px}
-.hr{border:0;border-top:1px solid #e4e7ec;margin:10px 0}
 
 .group-row{
   display:grid;
@@ -96,6 +95,25 @@ canvas{border:1px solid #333;border-radius:8px;width:100%;height:180px;backgroun
   <div id="lista_grupos"></div>
 </div>
 
+<!-- ===== GRANDEZAS ELÉTRICAS (MANTIDO COMO ESTAVA) ===== -->
+<h2>Grandezas Elétricas</h2>
+<div class="campo">
+  <span>Necessário medir grandezas elétricas? *</span>
+  <select id="medir_status">
+    <option value="">Selecione</option>
+    <option>Não</option>
+    <option>Sim</option>
+  </select>
+</div>
+
+<div id="medir_box" style="display:none; margin-top:8px;">
+  <div class="campo">
+    <span>Preencher medições (ex.: V, A, kW, FP, Hz, etc.) *</span>
+    <textarea id="medir_dados" placeholder="Ex.: Tensão: 380V | Corrente: 22A | Potência: 11kW | FP: 0,92 | Frequência: 60Hz"></textarea>
+  </div>
+</div>
+<!-- ===== /ELÉTRICAS ===== -->
+
 <!-- ===== NOVO: INSPEÇÃO HIDRÁULICA ===== -->
 <h2>Inspeção Hidráulica</h2>
 <div class="campo">
@@ -113,7 +131,7 @@ canvas{border:1px solid #333;border-radius:8px;width:100%;height:180px;backgroun
     <textarea id="hid_dados" placeholder="Ex.: Pressão: 6,2 bar | Vazão: 18 m³/h | Nível: 72% | Observação: ..."></textarea>
   </div>
 </div>
-<!-- ===== /NOVO ===== -->
+<!-- ===== /HIDRÁULICA ===== -->
 
 <!-- ===== NOVO: MATERIAIS ===== -->
 <h2>Materiais</h2>
@@ -132,7 +150,7 @@ canvas{border:1px solid #333;border-radius:8px;width:100%;height:180px;backgroun
     <textarea id="mat_dados" placeholder="Ex.: Substituído: válvula 2'' | Instalado: manômetro 0-10 bar | Retirado: filtro Y..."></textarea>
   </div>
 </div>
-<!-- ===== /NOVO ===== -->
+<!-- ===== /MATERIAIS ===== -->
 
 <h2>Serviços</h2>
 <div class="campo"><span>Situação encontrada *</span><textarea id="resumo"></textarea></div>
@@ -186,7 +204,7 @@ function limparTextoArquivo(s){
     .replace(/^_+|_+$/g, "");
 }
 
-// ========= CÁLCULO DE TEMPO (HH:MM) =========
+// ========= CÁLCULO (HH:MM) =========
 function calcDuracaoHHMM(inicio, fim){
   if(!inicio || !fim) return "";
   const [hi, mi] = inicio.split(":").map(Number);
@@ -201,7 +219,7 @@ function calcDuracaoHHMM(inicio, fim){
   return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
 }
 
-// ========= EQUIPE (2 fixos + extras) =========
+// ========= EQUIPE =========
 const teamExtras = document.getElementById("team_extras");
 const btnAddTeam = document.getElementById("btn_add_team");
 let teamExtraCount = 0;
@@ -228,7 +246,7 @@ function listarEquipe(){
   return [nome1.value, nome2.value, ...extras].filter(v=>!isBlank(v));
 }
 
-// ========= GRUPOS (MÚLTIPLOS) =========
+// ========= GRUPOS =========
 const gruposBox = document.getElementById("grupos_box");
 const listaGrupos = document.getElementById("lista_grupos");
 const btnAddGrupo = document.getElementById("btn_add_grupo");
@@ -264,13 +282,12 @@ function criarLinhaGrupo(){
     </div>
     <button type="button" class="btn-danger remover" data-role="remover">Remover</button>
   `;
+
   const inInicio = row.querySelector('[data-role="inicio"]');
   const inFim = row.querySelector('[data-role="fim"]');
   const inTotal = row.querySelector('[data-role="total"]');
 
-  function atualizar(){
-    inTotal.value = calcDuracaoHHMM(inInicio.value, inFim.value);
-  }
+  function atualizar(){ inTotal.value = calcDuracaoHHMM(inInicio.value, inFim.value); }
   inInicio.addEventListener("change", atualizar);
   inFim.addEventListener("change", atualizar);
 
@@ -306,7 +323,23 @@ function validarGrupos(){
   return true;
 }
 
-// ========= INSPEÇÃO HIDRÁULICA =========
+// ========= GRANDEZAS ELÉTRICAS (MANTIDO) =========
+const medirStatus = document.getElementById("medir_status");
+const medirBox = document.getElementById("medir_box");
+const medirDados = document.getElementById("medir_dados");
+
+medirStatus.addEventListener("change", () => {
+  const sim = medirStatus.value === "Sim";
+  medirBox.style.display = sim ? "block" : "none";
+  if(!sim) medirDados.value = "";
+});
+function validarEletrica(){
+  if(isBlank(medirStatus.value)) return false;
+  if(medirStatus.value === "Sim" && isBlank(medirDados.value)) return false;
+  return true;
+}
+
+// ========= HIDRÁULICA =========
 const hidStatus = document.getElementById("hid_status");
 const hidBox = document.getElementById("hid_box");
 const hidDados = document.getElementById("hid_dados");
@@ -431,8 +464,11 @@ function buildWhatsText(){
     });
   }
 
+  parts.push(`Medir grandezas elétricas: ${medirStatus.value}`);
+  if(medirStatus.value === "Sim") parts.push(`Medições elétricas: ${medirDados.value}`);
+
   parts.push(`Inspeção hidráulica: ${hidStatus.value}`);
-  if(hidStatus.value === "Sim") parts.push(`Medições: ${hidDados.value}`);
+  if(hidStatus.value === "Sim") parts.push(`Medições hidráulicas: ${hidDados.value}`);
 
   parts.push(`Materiais: ${matStatus.value}`);
   if(matStatus.value === "Sim") parts.push(`Descrição: ${matDados.value}`);
@@ -464,6 +500,10 @@ async function gerarPDFBlob(){
   if(!validarGrupos()){
     alert("Preencha os grupos indisponíveis: Grupo + Hora Início + Hora Fim (para cada linha).");
     throw new Error("Grupos inválidos.");
+  }
+  if(!validarEletrica()){
+    alert("Preencha 'Grandezas Elétricas' e, se Sim, informe as medições.");
+    throw new Error("Elétrica obrigatório.");
   }
   if(!validarHidraulica()){
     alert("Preencha 'Inspeção hidráulica' e, se Sim, informe as medições.");
@@ -501,9 +541,11 @@ async function gerarPDFBlob(){
     ["PET", pet.value || ""],
     ["Equipe", equipe],
     ["Grupos indisponíveis", grupo_status.value],
+    ["Medir grandezas elétricas", medirStatus.value],
     ["Inspeção hidráulica", hidStatus.value],
     ["Materiais", matStatus.value],
   ];
+  if(medirStatus.value === "Sim") dados.push(["Medições elétricas", medirDados.value]);
   if(hidStatus.value === "Sim") dados.push(["Medições hidráulicas", hidDados.value]);
   if(matStatus.value === "Sim") dados.push(["Materiais (descrição)", matDados.value]);
 
