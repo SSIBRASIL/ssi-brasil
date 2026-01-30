@@ -29,6 +29,8 @@ canvas{border:1px solid #333;border-radius:8px;width:100%;height:180px;backgroun
 .photo-preview img{height:70px;margin:4px;border-radius:6px;border:1px solid #ccc}
 
 .nota{font-size:12px;color:#444;margin-top:8px}
+.hr{border:0;border-top:1px solid #e4e7ec;margin:10px 0}
+
 .group-row{
   display:grid;
   grid-template-columns: 1.2fr 1fr 1fr 1fr 0.8fr;
@@ -38,7 +40,23 @@ canvas{border:1px solid #333;border-radius:8px;width:100%;height:180px;backgroun
 }
 @media(max-width:768px){.group-row{grid-template-columns:1fr}}
 .group-row .remover{height:38px;margin-top:0}
-.hr{border:0;border-top:1px solid #e4e7ec;margin:10px 0}
+
+.team-row{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+}
+@media(max-width:768px){.team-row{grid-template-columns:1fr}}
+
+.team-extra-row{
+  display:grid;
+  grid-template-columns: 1fr 0.8fr;
+  gap:8px;
+  align-items:end;
+  margin-top:8px;
+}
+@media(max-width:768px){.team-extra-row{grid-template-columns:1fr}}
+.team-extra-row .remover{height:38px;margin-top:0}
 </style>
 </head>
 
@@ -56,7 +74,7 @@ canvas{border:1px solid #333;border-radius:8px;width:100%;height:180px;backgroun
   <div class="campo"><span>Hora</span><input type="time" id="hora"></div>
 </div>
 
-<h2>Atividade necessita de:</h2>
+<h2>Documentação de Segurança:</h2>
 <div class="grid">
   <div class="campo"><span>APR</span><select id="apr"><option value="">Selecione</option><option>Sim</option><option>Não</option></select></div>
   <div class="campo"><span>LPE</span><select id="lpe"><option value="">Selecione</option><option>Sim</option><option>Não</option></select></div>
@@ -64,12 +82,13 @@ canvas{border:1px solid #333;border-radius:8px;width:100%;height:180px;backgroun
 </div>
 
 <h2>Equipe</h2>
-<div class="grid">
-  <div class="campo"><span>Nome 1</span><input id="nome1"></div>
-  <div class="campo"><span>Nome 2</span><input id="nome2"></div>
-  <div class="campo"><span>Nome 3</span><input id="nome3"></div>
-  <div class="campo"><span>Nome 4</span><input id="nome4"></div>
+<div class="team-row">
+  <div class="campo"><span>Nome 1 *</span><input id="nome1"></div>
+  <div class="campo"><span>Nome 2 *</span><input id="nome2"></div>
 </div>
+
+<div id="team_extras" style="margin-top:8px;"></div>
+<button type="button" class="btn-sec" id="btn_add_team">➕ Adicionar membro (opcional)</button>
 
 <h2>Estação / Grupos</h2>
 <div class="campo">
@@ -88,18 +107,8 @@ canvas{border:1px solid #333;border-radius:8px;width:100%;height:180px;backgroun
   </div>
 
   <div id="lista_grupos"></div>
-
-  <div class="hr"></div>
-
-  <div class="grid">
-    <div class="campo">
-      <span>Total Geral (h)</span>
-      <input id="g_total_geral" readonly>
-    </div>
-  </div>
 </div>
 
-<!-- ===== NOVO CAMPO: GRANDEZAS ELÉTRICAS (OBRIGATÓRIO) ===== -->
 <h2>Grandezas Elétricas</h2>
 <div class="campo">
   <span>Necessário medir grandezas elétricas? *</span>
@@ -116,7 +125,6 @@ canvas{border:1px solid #333;border-radius:8px;width:100%;height:180px;backgroun
     <textarea id="medir_dados" placeholder="Ex.: Tensão: 380V | Corrente: 22A | Potência: 11kW | FP: 0,92 | Frequência: 60Hz"></textarea>
   </div>
 </div>
-<!-- ===== /NOVO CAMPO ===== -->
 
 <h2>Serviços</h2>
 <div class="campo"><span>Situação encontrada *</span><textarea id="resumo"></textarea></div>
@@ -150,7 +158,8 @@ canvas{border:1px solid #333;border-radius:8px;width:100%;height:180px;backgroun
 // ========= CONFIG =========
 const WHATS_PHONE = "5511981374513"; // troque aqui
 
-// ========= NOME DO ARQUIVO (DATA+HORA) =========
+// ========= HELPERS =========
+function isBlank(v){ return !v || !String(v).trim(); }
 function dataHoraArquivo(){
   const d = new Date();
   const yyyy = d.getFullYear();
@@ -168,43 +177,65 @@ function limparTextoArquivo(s){
     .replace(/_+/g, "_")
     .replace(/^_+|_+$/g, "");
 }
-function isBlank(v){ return !v || !String(v).trim(); }
 
-// ========= CÁLCULO TEMPO =========
-function calc(i,f){
-  if(!i||!f) return "";
-  let [hi,mi] = i.split(":").map(Number);
-  let [hf,mf] = f.split(":").map(Number);
-  let t = (hf*60+mf) - (hi*60+mi);
-  if(t < 0) t += 1440;
-  return (t/60).toFixed(2);
+// ========= CÁLCULO DE TEMPO (CORRIGIDO) =========
+// Retorna duração em HH:MM (ex.: 02:30). Suporta virada de dia.
+function calcDuracaoHHMM(inicio, fim){
+  if(!inicio || !fim) return "";
+  const [hi, mi] = inicio.split(":").map(Number);
+  const [hf, mf] = fim.split(":").map(Number);
+  if([hi,mi,hf,mf].some(n => Number.isNaN(n))) return "";
+
+  let start = hi*60 + mi;
+  let end = hf*60 + mf;
+  let diff = end - start;
+  if(diff < 0) diff += 1440;
+
+  const h = Math.floor(diff/60);
+  const m = diff % 60;
+  return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
+}
+
+// ========= EQUIPE (2 fixos + adicionar extras) =========
+const teamExtras = document.getElementById("team_extras");
+const btnAddTeam = document.getElementById("btn_add_team");
+let teamExtraCount = 0;
+
+function criarMembroExtra(){
+  teamExtraCount++;
+  const row = document.createElement("div");
+  row.className = "team-extra-row";
+  row.innerHTML = `
+    <div class="campo">
+      <span>Nome ${2 + teamExtraCount}</span>
+      <input data-role="team-extra">
+    </div>
+    <button type="button" class="btn-danger remover" data-role="remover">Remover</button>
+  `;
+  row.querySelector('[data-role="remover"]').addEventListener("click", ()=>{
+    row.remove();
+  });
+  teamExtras.appendChild(row);
+}
+btnAddTeam.addEventListener("click", criarMembroExtra);
+
+function listarEquipe(){
+  const extras = [...teamExtras.querySelectorAll('[data-role="team-extra"]')].map(i=>i.value).filter(v=>!isBlank(v));
+  return [nome1.value, nome2.value, ...extras].filter(v=>!isBlank(v));
 }
 
 // ========= GRUPOS (MÚLTIPLOS) =========
 const gruposBox = document.getElementById("grupos_box");
 const listaGrupos = document.getElementById("lista_grupos");
-const totalGeral = document.getElementById("g_total_geral");
 const btnAddGrupo = document.getElementById("btn_add_grupo");
 
 function limparGrupos(){
   listaGrupos.innerHTML = "";
-  totalGeral.value = "";
-}
-
-function somarTotais(){
-  let soma = 0;
-  const totals = listaGrupos.querySelectorAll('[data-role="total"]');
-  totals.forEach(inp=>{
-    const v = parseFloat((inp.value || "").replace(",", "."));
-    if(!isNaN(v)) soma += v;
-  });
-  totalGeral.value = soma ? soma.toFixed(2) : "";
 }
 
 function criarLinhaGrupo(){
   const row = document.createElement("div");
   row.className = "group-row";
-
   row.innerHTML = `
     <div class="campo">
       <span>Grupo</span>
@@ -214,6 +245,7 @@ function criarLinhaGrupo(){
         <option>Grupo 2</option>
         <option>Grupo 3</option>
         <option>Grupo 4</option>
+        <option>Instalação (toda parada)</option>
       </select>
     </div>
 
@@ -228,7 +260,7 @@ function criarLinhaGrupo(){
     </div>
 
     <div class="campo">
-      <span>Total (h)</span>
+      <span>Total (HH:MM)</span>
       <input data-role="total" readonly>
     </div>
 
@@ -238,21 +270,14 @@ function criarLinhaGrupo(){
   const inInicio = row.querySelector('[data-role="inicio"]');
   const inFim = row.querySelector('[data-role="fim"]');
   const inTotal = row.querySelector('[data-role="total"]');
-  const btnRemover = row.querySelector('[data-role="remover"]');
 
   function atualizarTotalLinha(){
-    inTotal.value = calc(inInicio.value, inFim.value);
-    somarTotais();
+    inTotal.value = calcDuracaoHHMM(inInicio.value, inFim.value);
   }
-
   inInicio.addEventListener("change", atualizarTotalLinha);
   inFim.addEventListener("change", atualizarTotalLinha);
 
-  btnRemover.addEventListener("click", () => {
-    row.remove();
-    somarTotais();
-  });
-
+  row.querySelector('[data-role="remover"]').addEventListener("click", ()=>row.remove());
   listaGrupos.appendChild(row);
   return row;
 }
@@ -262,16 +287,40 @@ grupo_status.addEventListener("change", () => {
   gruposBox.style.display = sim ? "block" : "none";
   if(!sim){
     limparGrupos();
-  }else{
-    if(listaGrupos.children.length === 0){
-      criarLinhaGrupo();
-    }
+  } else if(listaGrupos.children.length === 0){
+    criarLinhaGrupo();
   }
 });
+btnAddGrupo.addEventListener("click", ()=>criarLinhaGrupo());
 
-btnAddGrupo.addEventListener("click", () => criarLinhaGrupo());
+function coletarGrupos(){
+  const rows = [...listaGrupos.querySelectorAll(".group-row")];
+  const out = [];
+  rows.forEach(r=>{
+    const grupo = r.querySelector('[data-role="grupo"]').value;
+    const inicio = r.querySelector('[data-role="inicio"]').value;
+    const fim = r.querySelector('[data-role="fim"]').value;
+    const total = r.querySelector('[data-role="total"]').value;
+    if(grupo || inicio || fim || total){
+      out.push({grupo, inicio, fim, total});
+    }
+  });
+  return out;
+}
 
-// ========= NOVO CAMPO: MEDIR GRANDEZAS (OBRIGATÓRIO) =========
+function validarGrupos(){
+  if(grupo_status.value !== "Sim") return true;
+  const gs = coletarGrupos();
+  if(gs.length === 0) return false;
+  for(const g of gs){
+    if(isBlank(g.grupo)) return false;
+    if(isBlank(g.inicio) || isBlank(g.fim)) return false;
+    if(isBlank(g.total)) return false;
+  }
+  return true;
+}
+
+// ========= GRANDEZAS ELÉTRICAS =========
 const medirStatus = document.getElementById("medir_status");
 const medirBox = document.getElementById("medir_box");
 const medirDados = document.getElementById("medir_dados");
@@ -279,10 +328,14 @@ const medirDados = document.getElementById("medir_dados");
 medirStatus.addEventListener("change", () => {
   const sim = medirStatus.value === "Sim";
   medirBox.style.display = sim ? "block" : "none";
-  if(!sim){
-    medirDados.value = "";
-  }
+  if(!sim) medirDados.value = "";
 });
+
+function validarGrandezas(){
+  if(isBlank(medirStatus.value)) return false;
+  if(medirStatus.value === "Sim" && isBlank(medirDados.value)) return false;
+  return true;
+}
 
 // ========= ASSINATURA (MOUSE + TOUCH) =========
 const canvas = document.getElementById("sign");
@@ -301,7 +354,6 @@ window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
 let desenhando = false;
-
 function getPos(e){
   const rect = canvas.getBoundingClientRect();
   if(e.touches && e.touches[0]){
@@ -329,7 +381,6 @@ canvas.addEventListener("mousedown", startDraw);
 canvas.addEventListener("mousemove", moveDraw);
 canvas.addEventListener("mouseup", endDraw);
 canvas.addEventListener("mouseleave", endDraw);
-
 canvas.addEventListener("touchstart", startDraw, {passive:false});
 canvas.addEventListener("touchmove", moveDraw, {passive:false});
 canvas.addEventListener("touchend", endDraw);
@@ -355,7 +406,7 @@ fotos.onchange = (e) => {
   });
 };
 
-// ========= HELPERS PDF =========
+// ========= PDF / WHATS =========
 async function fetchAsDataURL(url){
   const res = await fetch(url);
   const blob = await res.blob();
@@ -364,41 +415,6 @@ async function fetchAsDataURL(url){
     fr.onload = () => resolve(fr.result);
     fr.readAsDataURL(blob);
   });
-}
-
-function coletarGrupos(){
-  const rows = [...listaGrupos.querySelectorAll(".group-row")];
-  const out = [];
-  rows.forEach(r=>{
-    const grupo = r.querySelector('[data-role="grupo"]').value;
-    const inicio = r.querySelector('[data-role="inicio"]').value;
-    const fim = r.querySelector('[data-role="fim"]').value;
-    const total = r.querySelector('[data-role="total"]').value;
-    if(grupo || inicio || fim || total){
-      out.push({grupo, inicio, fim, total});
-    }
-  });
-  return out;
-}
-
-function validarGrupos(){
-  if(grupo_status.value !== "Sim") return true;
-  const gs = coletarGrupos();
-  if(gs.length === 0) return false;
-
-  // exige que cada linha informada tenha grupo e horários
-  for(const g of gs){
-    if(isBlank(g.grupo)) return false;
-    if(isBlank(g.inicio) || isBlank(g.fim)) return false;
-    if(isBlank(g.total)) return false;
-  }
-  return true;
-}
-
-function validarGrandezas(){
-  if(isBlank(medirStatus.value)) return false;
-  if(medirStatus.value === "Sim" && isBlank(medirDados.value)) return false;
-  return true;
 }
 
 function buildWhatsText(){
@@ -410,21 +426,19 @@ function buildWhatsText(){
   if(!isBlank(data.value)) parts.push(`Data: ${data.value}`);
   if(!isBlank(hora.value)) parts.push(`Hora: ${hora.value}`);
 
+  const equipe = listarEquipe();
+  parts.push(`Equipe: ${equipe.join(" / ")}`);
+
+  parts.push(`Grupos indisponíveis: ${grupo_status.value}`);
   if(grupo_status.value === "Sim"){
     const gs = coletarGrupos();
-    parts.push(`Grupos indisponíveis: Sim`);
     gs.forEach((g, idx)=>{
-      parts.push(`#${idx+1} - ${g.grupo} - Início ${g.inicio} - Fim ${g.fim} - Total ${g.total} h`);
+      parts.push(`#${idx+1} - ${g.grupo} - Início ${g.inicio} - Fim ${g.fim} - Total ${g.total}`);
     });
-    if(totalGeral.value) parts.push(`Total geral: ${totalGeral.value} h`);
-  } else {
-    parts.push(`Grupos indisponíveis: ${grupo_status.value || ""}`);
   }
 
   parts.push(`Medir grandezas elétricas: ${medirStatus.value}`);
-  if(medirStatus.value === "Sim"){
-    parts.push(`Medições: ${medirDados.value}`);
-  }
+  if(medirStatus.value === "Sim") parts.push(`Medições: ${medirDados.value}`);
 
   if(!isBlank(resumo.value)) parts.push(`Situação: ${resumo.value}`);
   if(!isBlank(ocorrencia.value)) parts.push(`Ocorrência: ${ocorrencia.value}`);
@@ -433,11 +447,15 @@ function buildWhatsText(){
   return parts.join("\n");
 }
 
-// ========= PDF (gera + retorna blob) =========
 async function gerarPDFBlob(){
+  // validações
   if(isBlank(instalacao.value) || isBlank(municipio.value) || isBlank(os.value) || isBlank(resumo.value) || isBlank(responsavel.value)){
     alert("Preencha os campos obrigatórios: Instalação, Município, OS SAP, Situação encontrada e Responsável.");
     throw new Error("Campos obrigatórios não preenchidos.");
+  }
+  if(isBlank(nome1.value) || isBlank(nome2.value)){
+    alert("Preencha os 2 nomes obrigatórios da equipe (Nome 1 e Nome 2).");
+    throw new Error("Equipe obrigatória.");
   }
   if(imagens.length === 0){
     alert("Inclua pelo menos 1 foto (obrigatório).");
@@ -461,6 +479,7 @@ async function gerarPDFBlob(){
 
   let logo = "";
   try { logo = await fetchAsDataURL("RP.jpg"); } catch(e) {}
+
   if(logo){
     try { doc.addImage(logo, "JPEG", 10, 8, 55, 18); }
     catch(e){ doc.addImage(logo, "PNG", 10, 8, 55, 18); }
@@ -471,7 +490,7 @@ async function gerarPDFBlob(){
   doc.setFontSize(9);
   doc.text("Desenvolvido por Lucas Moreira Rodrigues", 105, 24, { align: "center" });
 
-  const equipe = [nome1.value, nome2.value, nome3.value, nome4.value].filter(v=>!isBlank(v)).join(" / ");
+  const equipe = listarEquipe().join(" / ");
   const dados = [
     ["Instalação", instalacao.value],
     ["Município", municipio.value],
@@ -485,12 +504,7 @@ async function gerarPDFBlob(){
     ["Grupos indisponíveis", grupo_status.value],
     ["Medir grandezas elétricas", medirStatus.value],
   ];
-  if(medirStatus.value === "Sim"){
-    dados.push(["Medições", medirDados.value]);
-  }
-  if(grupo_status.value === "Sim" && totalGeral.value){
-    dados.push(["Total geral (h)", totalGeral.value]);
-  }
+  if(medirStatus.value === "Sim") dados.push(["Medições", medirDados.value]);
 
   doc.autoTable({
     startY: 30,
@@ -503,21 +517,18 @@ async function gerarPDFBlob(){
 
   let y = doc.lastAutoTable.finalY + 6;
 
-  // Tabela de grupos, se houver
-  const gruposDetalhe = [];
+  // tabela grupos (se sim)
   if(grupo_status.value === "Sim"){
     const gs = coletarGrupos();
-    gs.forEach(g=>gruposDetalhe.push([g.grupo, g.inicio, g.fim, g.total]));
-  }
-  if(gruposDetalhe.length){
+    const body = gs.map(g => [g.grupo, g.inicio, g.fim, g.total]);
     doc.setFontSize(11);
     doc.text("Detalhamento de Grupos Indisponíveis", 10, y);
     y += 2;
 
     doc.autoTable({
       startY: y + 2,
-      head: [["Grupo", "Hora Início", "Hora Fim", "Total (h)"]],
-      body: gruposDetalhe,
+      head: [["Grupo", "Hora Início", "Hora Fim", "Total (HH:MM)"]],
+      body,
       styles: { fontSize: 9, cellPadding: 2 },
       headStyles: { fillColor: [11, 61, 145] },
       theme: "grid"
@@ -525,7 +536,7 @@ async function gerarPDFBlob(){
     y = doc.lastAutoTable.finalY + 6;
   }
 
-  // Serviços
+  // serviços
   doc.setFontSize(11);
   doc.text("Serviços", 10, y);
   y += 4;
@@ -553,7 +564,7 @@ async function gerarPDFBlob(){
     }
   }
 
-  // Responsável + assinatura
+  // responsável + assinatura
   doc.setFont(undefined, "bold");
   doc.text("Responsável: ", 10, y);
   doc.setFont(undefined, "normal");
@@ -569,7 +580,7 @@ async function gerarPDFBlob(){
   doc.addImage(signData, "PNG", 10, y, 80, 30);
   y += 38;
 
-  // Fotos
+  // fotos
   doc.setFont(undefined, "bold");
   doc.text("Fotos", 10, y);
   doc.setFont(undefined, "normal");
@@ -597,7 +608,6 @@ async function gerarPDFBlob(){
   return { blob, filename };
 }
 
-// ========= SALVAR PDF =========
 async function gerarPDF(){
   const { blob, filename } = await gerarPDFBlob();
   const url = URL.createObjectURL(blob);
@@ -610,7 +620,6 @@ async function gerarPDF(){
   URL.revokeObjectURL(url);
 }
 
-// ========= ENVIAR WHATS =========
 async function enviarWhats(){
   const texto = buildWhatsText();
   const { blob, filename } = await gerarPDFBlob();
