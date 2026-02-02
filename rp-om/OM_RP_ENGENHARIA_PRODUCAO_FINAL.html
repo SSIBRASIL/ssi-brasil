@@ -1,126 +1,215 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>OM RP Engenharia</title>
 
 <style>
-body{font-family:Arial;background:#eef2f6;margin:0;padding:10px}
-.container{max-width:1100px;margin:auto;background:#fff;padding:15px;border-radius:12px}
+  body{font-family:Arial;background:#eef2f6;margin:0;padding:10px}
+  .container{max-width:1100px;margin:auto;background:#fff;padding:15px;border-radius:12px}
 
-.topo-img{width:100%;height:130px;object-fit:cover;border-radius:10px;margin-bottom:10px}
+  /* LOGO TOPO PREENCHENDO */
+  .topo-img{
+    width:100%;
+    height:130px;
+    object-fit:cover;
+    display:block;
+    margin-bottom:10px;
+    border-radius:10px;
+  }
 
-h2{background:#0b3d91;color:#fff;padding:8px;border-radius:6px;font-size:16px;margin-top:16px}
+  h2{background:#0b3d91;color:#fff;padding:8px;border-radius:6px;font-size:16px;margin:14px 0 10px}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  @media(max-width:768px){.grid{grid-template-columns:1fr}}
 
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-@media(max-width:768px){.grid{grid-template-columns:1fr}}
+  .campo{display:flex;flex-direction:column;font-size:13px;font-weight:bold}
+  .campo span{margin-bottom:2px;color:#0b3d91}
 
-.campo{display:flex;flex-direction:column;font-size:13px;font-weight:bold}
-.campo span{color:#0b3d91;margin-bottom:2px}
+  input,select,textarea{width:100%;padding:8px;border-radius:6px;border:1px solid #aaa;font-weight:normal;box-sizing:border-box}
+  textarea{min-height:70px}
 
-input,select,textarea{padding:8px;border-radius:6px;border:1px solid #aaa;width:100%}
-textarea{min-height:60px}
+  button{width:100%;margin-top:10px;background:#0b3d91;color:#fff;border:none;padding:12px;border-radius:8px;font-size:16px;cursor:pointer}
+  .btn-sec{background:#1d6fd8}
+  .btn-danger{background:#b42318}
 
-button{width:100%;margin-top:10px;background:#0b3d91;color:#fff;border:none;padding:12px;border-radius:8px;font-size:16px;cursor:pointer}
-.btn-sec{background:#1d6fd8}
-.btn-del{background:#b42318}
+  canvas{border:1px solid #333;border-radius:8px;width:100%;height:180px;background:#fff;touch-action:none}
+  .photo-preview img{height:70px;margin:4px;border-radius:6px;border:1px solid #ccc}
+  .nota{font-size:12px;color:#444;margin-top:8px}
 
-canvas{border:1px solid #333;border-radius:8px;width:100%;height:180px}
+  .group-row{
+    display:grid;
+    grid-template-columns: 1.2fr 1fr 1fr 1fr 0.8fr;
+    gap:8px;
+    align-items:end;
+    margin-top:8px;
+  }
+  @media(max-width:768px){.group-row{grid-template-columns:1fr}}
+  .group-row .remover{height:38px;margin-top:0}
 
-.photo-preview img{height:70px;margin:4px;border-radius:6px;border:1px solid #ccc}
-.grupo-row,.team-extra{display:grid;gap:8px;margin-top:6px}
-.grupo-row{grid-template-columns:1.3fr 1fr 1fr 1fr .6fr}
-.team-extra{grid-template-columns:1fr .6fr}
-@media(max-width:768px){.grupo-row,.team-extra{grid-template-columns:1fr}}
+  .team-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  @media(max-width:768px){.team-row{grid-template-columns:1fr}}
+  .team-extra-row{
+    display:grid;
+    grid-template-columns: 1fr 0.8fr;
+    gap:8px;
+    align-items:end;
+    margin-top:8px;
+  }
+  @media(max-width:768px){.team-extra-row{grid-template-columns:1fr}}
+  .team-extra-row .remover{height:38px;margin-top:0}
 </style>
 </head>
 
 <body>
 <div class="container">
 
-<img src="RP.jpg" class="topo-img">
+  <img src="RP.jpg" class="topo-img" alt="RP Engenharia">
 
-<h2>Dados Gerais</h2>
-<div class="grid">
-  <div class="campo"><span>Instalação *</span><input id="instalacao"></div>
-  <div class="campo"><span>Município *</span><input id="municipio"></div>
-  <div class="campo"><span>OS SAP *</span><input id="os"></div>
-  <div class="campo"><span>Data</span><input type="date" id="data"></div>
-  <div class="campo"><span>Hora</span><input type="time" id="hora"></div>
-</div>
+  <h2>Dados Gerais</h2>
+  <div class="grid">
+    <div class="campo"><span>Instalação *</span><input id="instalacao"></div>
+    <div class="campo"><span>Município *</span><input id="municipio"></div>
+    <div class="campo"><span>OS SAP *</span><input id="os"></div>
+    <div class="campo"><span>Data</span><input type="date" id="data"></div>
 
-<h2>Documentação de Segurança</h2>
-<div class="grid">
-  <div class="campo"><span>APR *</span><select id="apr"><option></option><option>Sim</option><option>Não</option></select></div>
-  <div class="campo"><span>LPE *</span><select id="lpe"><option></option><option>Sim</option><option>Não</option></select></div>
-  <div class="campo"><span>PET *</span><select id="pet"><option></option><option>Sim</option><option>Não</option></select></div>
-</div>
+    <div class="campo"><span>Hora</span><input type="time" id="hora"></div>
+    <div class="campo"><span>Horário inicial *</span><input type="time" id="hora_inicio"></div>
+    <div class="campo"><span>Tempo de atividade (HH:MM)</span><input id="tempo_atividade" readonly></div>
+    <div class="campo"><span></span><div style="height:38px"></div></div>
+  </div>
 
-<h2>Equipe</h2>
-<div class="grid">
-  <div class="campo"><span>Nome 1 *</span><input id="nome1"></div>
-  <div class="campo"><span>Nome 2 *</span><input id="nome2"></div>
-</div>
-<div id="extras"></div>
-<button class="btn-sec" onclick="addMembro()">➕ Adicionar membro</button>
+  <h2>Documentação de Segurança</h2>
+  <div class="grid">
+    <div class="campo"><span>APR *</span><select id="apr"><option value="">Selecione</option><option>Sim</option><option>Não</option></select></div>
+    <div class="campo"><span>LPE *</span><select id="lpe"><option value="">Selecione</option><option>Sim</option><option>Não</option></select></div>
+    <div class="campo"><span>PET *</span><select id="pet"><option value="">Selecione</option><option>Sim</option><option>Não</option></select></div>
+    <div class="campo"><span></span><div style="height:38px"></div></div>
+  </div>
 
-<h2>Estação / Grupos</h2>
-<div class="campo">
-  <span>Grupo ficou indisponível? *</span>
-  <select id="grupo_status" onchange="toggleGrupos()">
-    <option></option><option>Não</option><option>Sim</option>
-  </select>
-</div>
+  <h2>Equipe</h2>
+  <div class="team-row">
+    <div class="campo"><span>Nome 1 *</span><input id="nome1"></div>
+    <div class="campo"><span>Nome 2 *</span><input id="nome2"></div>
+  </div>
+  <div id="team_extras" style="margin-top:8px;"></div>
+  <button type="button" class="btn-sec" id="btn_add_team">➕ Adicionar membro (opcional)</button>
 
-<div id="grupos_box" style="display:none">
-  <button class="btn-sec" onclick="addGrupo()">➕ Adicionar grupo</button>
-  <div id="lista_grupos"></div>
-</div>
+  <h2>Indisponibilidade Estação/Grupo</h2>
+  <div class="campo">
+    <span>Estação/Grupo permaneceu desligado ou indisponível durante a manutenção? *</span>
+    <select id="grupo_status">
+      <option value="">Selecione</option>
+      <option>Não</option>
+      <option>Sim</option>
+    </select>
+  </div>
 
-<h2>Grandezas Elétricas</h2>
-<div class="campo">
-<select id="eletrica_status" onchange="toggleBox('eletrica_box',this.value)">
-<option></option><option>Não</option><option>Sim</option>
-</select>
-</div>
-<div id="eletrica_box" style="display:none"><textarea id="eletrica_dados"></textarea></div>
+  <div id="grupos_box" style="display:none; margin-top:10px;">
+    <div class="campo">
+      <span>Grupos indisponíveis (adicione quantos forem necessários)</span>
+      <button type="button" class="btn-sec" id="btn_add_grupo">➕ Adicionar Grupo</button>
+    </div>
+    <div id="lista_grupos"></div>
+  </div>
 
-<h2>Inspeção Hidráulica</h2>
-<div class="campo">
-<select id="hid_status" onchange="toggleBox('hid_box',this.value)">
-<option></option><option>Não</option><option>Sim</option>
-</select>
-</div>
-<div id="hid_box" style="display:none"><textarea id="hid_dados"></textarea></div>
+  <!-- NOVO: INSPEÇÃO (antes de elétrica) -->
+  <h2>Inspeção</h2>
+  <div class="campo">
+    <span>Necessário realizar inspeção? *</span>
+    <select id="insp_status">
+      <option value="">Selecione</option>
+      <option>Não</option>
+      <option>Sim</option>
+    </select>
+  </div>
+  <div id="insp_box" style="display:none; margin-top:8px;">
+    <div class="campo">
+      <span>Descrever inspeção *</span>
+      <textarea id="insp_dados" placeholder="Descreva inspeções realizadas, verificações, medições visuais, etc."></textarea>
+    </div>
+  </div>
 
-<h2>Materiais</h2>
-<div class="campo">
-<select id="mat_status" onchange="toggleBox('mat_box',this.value)">
-<option></option><option>Não</option><option>Sim</option>
-</select>
-</div>
-<div id="mat_box" style="display:none"><textarea id="mat_dados"></textarea></div>
+  <!-- Grandezas Elétricas (mantido estilo Sim/Não + campo) -->
+  <h2>Grandezas Elétricas</h2>
+  <div class="campo">
+    <span>Necessário medir grandezas elétricas? *</span>
+    <select id="medir_status">
+      <option value="">Selecione</option>
+      <option>Não</option>
+      <option>Sim</option>
+    </select>
+  </div>
+  <div id="medir_box" style="display:none; margin-top:8px;">
+    <div class="campo">
+      <span>Preencher medições (ex.: V, A, kW, FP, Hz, etc.) *</span>
+      <textarea id="medir_dados" placeholder="Ex.: Tensão: 380V | Corrente: 22A | Potência: 11kW | FP: 0,92 | Frequência: 60Hz"></textarea>
+    </div>
+  </div>
 
-<h2>Serviços</h2>
-<textarea id="ocorrencia" placeholder="Ocorrência *"></textarea>
-<textarea id="resumo" placeholder="Situação encontrada *"></textarea>
-<textarea id="realizado" placeholder="Serviço realizado"></textarea>
+  <h2>Inspeção Hidráulica</h2>
+  <div class="campo">
+    <span>Necessário realizar inspeção hidráulica / medir grandezas? *</span>
+    <select id="hid_status">
+      <option value="">Selecione</option>
+      <option>Não</option>
+      <option>Sim</option>
+    </select>
+  </div>
+  <div id="hid_box" style="display:none; margin-top:8px;">
+    <div class="campo">
+      <span>Preencher valores (ex.: Pressão, Vazão, Nível, etc.) *</span>
+      <textarea id="hid_dados" placeholder="Ex.: Pressão: 6,2 bar | Vazão: 18 m³/h | Nível: 72% | Observação: ..."></textarea>
+    </div>
+  </div>
 
-<h2>Fotos *</h2>
-<input type="file" id="fotos" multiple accept="image/*">
-<div class="photo-preview" id="preview"></div>
+  <h2>Materiais</h2>
+  <div class="campo">
+    <span>Houve a utilização de materiais? *</span>
+    <select id="mat_status">
+      <option value="">Selecione</option>
+      <option>Não</option>
+      <option>Sim</option>
+    </select>
+  </div>
+  <div id="mat_box" style="display:none; margin-top:8px;">
+    <div class="campo">
+      <span>Descrever materiais utilizados (substituídos/instalados/retirados) *</span>
+      <textarea id="mat_dados" placeholder="Ex.: Substituído: válvula 2'' | Instalado: manômetro 0-10 bar | Retirado: filtro Y..."></textarea>
+    </div>
+  </div>
 
-<h2>Responsável *</h2>
-<input id="responsavel">
+  <h2>Serviços</h2>
+  <div class="campo"><span>Ocorrência *</span><textarea id="ocorrencia"></textarea></div>
+  <div class="campo"><span>Situação encontrada *</span><textarea id="resumo"></textarea></div>
+  <div class="campo"><span>Serviço realizado</span><textarea id="realizado"></textarea></div>
 
-<h2>Assinatura *</h2>
-<canvas id="sign"></canvas>
-<button onclick="limparSign()">Limpar assinatura</button>
+  <h2>Fotos (obrigatório)</h2>
+  <input type="file" id="fotos" multiple accept="image/*">
+  <div class="photo-preview" id="preview"></div>
 
-<button onclick="gerarPDF()">💾 SALVAR PDF</button>
-<button onclick="gerarExcel()">📊 SALVAR EXCEL</button>
-<button onclick="enviarWhats()">📲 ENVIAR WHATSAPP</button>
+  <h2>Responsável</h2>
+  <div class="campo"><span>Nome do responsável *</span><input id="responsavel"></div>
+
+  <!-- Horário final ao final da atividade -->
+  <h2>Encerramento</h2>
+  <div class="grid">
+    <div class="campo"><span>Horário final da atividade *</span><input type="time" id="hora_fim"></div>
+    <div class="campo"><span>Tempo de atividade (HH:MM)</span><input id="tempo_atividade2" readonly></div>
+    <div></div><div></div>
+  </div>
+
+  <h2>Assinatura</h2>
+  <canvas id="sign"></canvas>
+  <button type="button" class="btn-danger" id="limpar">Limpar assinatura</button>
+
+  <button type="button" id="pdf">💾 SALVAR PDF</button>
+  <button type="button" id="excel">📊 SALVAR EXCEL</button>
+  <button type="button" id="whats">📲 ENVIAR WHATSAPP</button>
+
+  <div class="nota">
+    * No celular, o envio tenta anexar o PDF automaticamente via compartilhamento. No PC, o WhatsApp abre com a mensagem pronta e o anexo é manual (limitação do WhatsApp Web).
+  </div>
 
 </div>
 
@@ -129,152 +218,691 @@ canvas{border:1px solid #333;border-radius:8px;width:100%;height:180px}
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <script>
-// ================== UTIL ==================
-const $=id=>document.getElementById(id);
-const obrig=v=>v&&v.trim();
-function dataHoraArquivo(){
- const d=new Date();
- return d.getFullYear()+(""+(d.getMonth()+1)).padStart(2,0)+(""+d.getDate()).padStart(2,0)+"_"+(""+d.getHours()).padStart(2,0)+(""+d.getMinutes()).padStart(2,0);
-}
-function toggleBox(id,v){$(id).style.display=v==="Sim"?"block":"none"}
+document.addEventListener("DOMContentLoaded", () => {
 
-// ================== EQUIPE ==================
-function addMembro(){
- const d=document.createElement("div");
- d.className="team-extra";
- d.innerHTML=`<input placeholder="Nome adicional"><button class="btn-del" onclick="this.parentNode.remove()">X</button>`;
- $("extras").appendChild(d);
-}
-function listarEquipe(){
- const extras=[...$("extras").querySelectorAll("input")].map(i=>i.value).filter(obrig);
- return [$("nome1").value,$("nome2").value,...extras];
-}
+  // ========= CONFIG =========
+  const WHATS_PHONE = "5511981374513"; // troque aqui
 
-// ================== GRUPOS ==================
-function toggleGrupos(){ $("grupos_box").style.display=$("grupo_status").value==="Sim"?"block":"none" }
-function calc(i,f){
- let a=i.split(":"),b=f.split(":");
- let t=(b[0]*60+b[1]*1)-(a[0]*60+a[1]*1);
- if(t<0)t+=1440;
- return String(Math.floor(t/60)).padStart(2,0)+":"+String(t%60).padStart(2,0);
-}
-function addGrupo(){
- const d=document.createElement("div");
- d.className="grupo-row";
- d.innerHTML=`
-<select><option></option><option>Grupo 1</option><option>Grupo 2</option><option>Grupo 3</option><option>Grupo 4</option><option>Instalação (toda parada)</option></select>
-<input type="time" onchange="this.parentNode.querySelector('.t').value=calc(this.value,this.parentNode.querySelector('.f').value)">
-<input type="time" class="f" onchange="this.parentNode.querySelector('.t').value=calc(this.parentNode.querySelector('input[type=time]').value,this.value)">
-<input class="t" readonly>
-<button class="btn-del" onclick="this.parentNode.remove()">X</button>`;
- $("lista_grupos").appendChild(d);
-}
-function listarGrupos(){
- return [...$("lista_grupos").children].map(g=>({
-  grupo:g.children[0].value,
-  inicio:g.children[1].value,
-  fim:g.children[2].value,
-  total:g.children[3].value
- }));
-}
+  // ========= HELPERS =========
+  const $ = (id) => document.getElementById(id);
+  const isBlank = (v) => !v || !String(v).trim();
 
-// ================== ASSINATURA ==================
-const c=$("sign"),ctx=c.getContext("2d");
-c.width=c.offsetWidth;c.height=180;
-let desenhando=false;
-c.onmousedown=e=>{desenhando=true;ctx.moveTo(e.offsetX,e.offsetY)};
-c.onmousemove=e=>{if(desenhando){ctx.lineTo(e.offsetX,e.offsetY);ctx.stroke()}};
-c.onmouseup=()=>desenhando=false;
-function limparSign(){ctx.clearRect(0,0,c.width,c.height)}
+  function dataHoraArquivo(){
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth()+1).padStart(2,"0");
+    const dd = String(d.getDate()).padStart(2,"0");
+    const hh = String(d.getHours()).padStart(2,"0");
+    const mi = String(d.getMinutes()).padStart(2,"0");
+    return `${yyyy}${mm}${dd}_${hh}${mi}`;
+  }
 
-// ================== FOTOS ==================
-let fotos=[];
-$("fotos").onchange=e=>{
- fotos=[];$("preview").innerHTML="";
- [...e.target.files].forEach(f=>{
-  const r=new FileReader();
-  r.onload=x=>{
-   fotos.push(x.target.result);
-   const i=document.createElement("img");i.src=x.target.result;
-   $("preview").appendChild(i);
-  };
-  r.readAsDataURL(f);
- });
-}
+  function limparTextoArquivo(s){
+    return (s || "")
+      .toString()
+      .trim()
+      .replace(/[^\w\-]+/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^_+|_+$/g, "");
+  }
 
-// ================== VALIDAÇÃO ==================
-function validarFormulario(){
- if(!obrig($("instalacao").value)||!obrig($("municipio").value)||!obrig($("os").value))return false;
- if(!obrig($("nome1").value)||!obrig($("nome2").value))return false;
- if(!obrig($("ocorrencia").value)||!obrig($("resumo").value))return false;
- if(!obrig($("responsavel").value))return false;
- if(fotos.length===0)return false;
- if($("grupo_status").value==="")return false;
- if($("grupo_status").value==="Sim"){
-  const gs=listarGrupos();
-  if(gs.length===0||gs.some(g=>!obrig(g.grupo)||!obrig(g.total)))return false;
- }
- if($("eletrica_status").value===""||($("eletrica_status").value==="Sim"&&!obrig($("eletrica_dados").value)))return false;
- if($("hid_status").value===""||($("hid_status").value==="Sim"&&!obrig($("hid_dados").value)))return false;
- if($("mat_status").value===""||($("mat_status").value==="Sim"&&!obrig($("mat_dados").value)))return false;
- return true;
-}
+  // ========= CÁLCULO (HH:MM) =========
+  function calcDuracaoHHMM(inicio, fim){
+    if(!inicio || !fim) return "";
+    const [hi, mi] = inicio.split(":").map(Number);
+    const [hf, mf] = fim.split(":").map(Number);
+    if([hi,mi,hf,mf].some(n => Number.isNaN(n))) return "";
+    let start = hi*60 + mi;
+    let end = hf*60 + mf;
+    let diff = end - start;
+    if(diff < 0) diff += 1440; // virada de dia
+    const h = Math.floor(diff/60);
+    const m = diff % 60;
+    return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
+  }
 
-// ================== PDF (MANTIDO) ==================
-async function gerarPDF(){
- if(!validarFormulario()){alert("Preencha todos os campos obrigatórios.");return;}
- const {jsPDF}=window.jspdf;
- const doc=new jsPDF();
- doc.text("ORDEM DE MANUTENÇÃO - RP ENGENHARIA",105,15,{align:"center"});
- doc.text("Responsável: "+$("responsavel").value,10,25);
- doc.addImage(c.toDataURL(),"PNG",10,30,80,30);
- doc.save(`OM_${dataHoraArquivo()}_${$("os").value}.pdf`);
-}
+  function atualizarTempoAtividade(){
+    const t = calcDuracaoHHMM($("hora_inicio").value, $("hora_fim").value);
+    $("tempo_atividade").value = t;
+    $("tempo_atividade2").value = t;
+  }
+  $("hora_inicio").addEventListener("change", atualizarTempoAtividade);
+  $("hora_fim").addEventListener("change", atualizarTempoAtividade);
 
-// ================== EXCEL (1 ABA) ==================
-function gerarExcel(){
- if(!validarFormulario()){alert("Preencha todos os campos obrigatórios.");return;}
- const grupos=$("grupo_status").value==="Sim"
- ?listarGrupos().map(g=>`${g.grupo} (${g.inicio}-${g.fim}=${g.total})`).join(" | ")
- :"";
- const linhas=[
- ["RP ENGENHARIA",""],
- ["ORDEM DE MANUTENÇÃO",""],
- ["Desenvolvido por Lucas Moreira Rodrigues",""],
- ["",""],
- ["Campo","Valor"],
- ["Instalação",$("instalacao").value],
- ["Município",$("municipio").value],
- ["OS SAP",$("os").value],
- ["Equipe",listarEquipe().join(" / ")],
- ["Grupos",$("grupo_status").value],
- ["Detalhe Grupos",grupos],
- ["Grandezas Elétricas",$("eletrica_status").value],
- ["Medições Elétricas",$("eletrica_dados").value],
- ["Inspeção Hidráulica",$("hid_status").value],
- ["Medições Hidráulicas",$("hid_dados").value],
- ["Materiais",$("mat_status").value],
- ["Descrição Materiais",$("mat_dados").value],
- ["Ocorrência",$("ocorrencia").value],
- ["Situação Encontrada",$("resumo").value],
- ["Serviço Realizado",$("realizado").value],
- ["Responsável",$("responsavel").value],
- ["Registro",new Date().toLocaleString("pt-BR")]
- ];
- const wb=XLSX.utils.book_new();
- const ws=XLSX.utils.aoa_to_sheet(linhas);
- ws["!merges"]=[{s:{r:0,c:0},e:{r:0,c:1}},{s:{r:1,c:0},e:{r:1,c:1}},{s:{r:2,c:0},e:{r:2,c:1}}];
- ws["!cols"]=[{wch:30},{wch:100}];
- XLSX.utils.book_append_sheet(wb,ws,"OM_Controle");
- XLSX.writeFile(wb,`OM_${dataHoraArquivo()}_${$("os").value}.xlsx`);
-}
+  // ========= EQUIPE (2 fixos + extras) =========
+  const teamExtras = $("team_extras");
+  const btnAddTeam = $("btn_add_team");
+  let teamExtraCount = 0;
 
-// ================== WHATSAPP ==================
-function enviarWhats(){
- if(!validarFormulario()){alert("Preencha todos os campos obrigatórios.");return;}
- gerarPDF();
- window.open("https://wa.me/55SEUNUMERO?text="+encodeURIComponent("OM "+$("os").value+" gerada com sucesso."));
-}
+  btnAddTeam.addEventListener("click", () => {
+    teamExtraCount++;
+    const row = document.createElement("div");
+    row.className = "team-extra-row";
+    row.innerHTML = `
+      <div class="campo">
+        <span>Nome ${2 + teamExtraCount}</span>
+        <input data-role="team-extra" />
+      </div>
+      <button type="button" class="btn-danger remover" data-role="remover">Remover</button>
+    `;
+    row.querySelector('[data-role="remover"]').addEventListener("click", () => row.remove());
+    teamExtras.appendChild(row);
+  });
+
+  function listarEquipe(){
+    const extras = [...teamExtras.querySelectorAll('[data-role="team-extra"]')]
+      .map(i => i.value).filter(v => !isBlank(v));
+    return [$("nome1").value, $("nome2").value, ...extras].filter(v => !isBlank(v));
+  }
+
+  // ========= GRUPOS (MÚLTIPLOS) =========
+  const gruposBox = $("grupos_box");
+  const listaGrupos = $("lista_grupos");
+  const btnAddGrupo = $("btn_add_grupo");
+
+  function limparGrupos(){ listaGrupos.innerHTML = ""; }
+
+  function criarLinhaGrupo(){
+    const row = document.createElement("div");
+    row.className = "group-row";
+    row.innerHTML = `
+      <div class="campo">
+        <span>Grupo</span>
+        <select data-role="grupo">
+          <option value="">Selecione</option>
+          <option>Grupo 1</option>
+          <option>Grupo 2</option>
+          <option>Grupo 3</option>
+          <option>Grupo 4</option>
+          <option>Instalação (toda parada)</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <span>Hora Início</span>
+        <input type="time" data-role="inicio" />
+      </div>
+
+      <div class="campo">
+        <span>Hora Fim</span>
+        <input type="time" data-role="fim" />
+      </div>
+
+      <div class="campo">
+        <span>Total (HH:MM)</span>
+        <input data-role="total" readonly />
+      </div>
+
+      <button type="button" class="btn-danger remover" data-role="remover">Remover</button>
+    `;
+
+    const inInicio = row.querySelector('[data-role="inicio"]');
+    const inFim = row.querySelector('[data-role="fim"]');
+    const inTotal = row.querySelector('[data-role="total"]');
+
+    const atualizar = () => { inTotal.value = calcDuracaoHHMM(inInicio.value, inFim.value); };
+    inInicio.addEventListener("change", atualizar);
+    inFim.addEventListener("change", atualizar);
+
+    row.querySelector('[data-role="remover"]').addEventListener("click", ()=>row.remove());
+    listaGrupos.appendChild(row);
+  }
+
+  $("grupo_status").addEventListener("change", () => {
+    const sim = $("grupo_status").value === "Sim";
+    gruposBox.style.display = sim ? "block" : "none";
+    if(!sim) limparGrupos();
+    else if(listaGrupos.children.length === 0) criarLinhaGrupo();
+  });
+
+  btnAddGrupo.addEventListener("click", criarLinhaGrupo);
+
+  function coletarGrupos(){
+    return [...listaGrupos.querySelectorAll(".group-row")]
+      .map(r => ({
+        grupo: r.querySelector('[data-role="grupo"]').value,
+        inicio: r.querySelector('[data-role="inicio"]').value,
+        fim: r.querySelector('[data-role="fim"]').value,
+        total: r.querySelector('[data-role="total"]').value
+      }))
+      .filter(g => g.grupo || g.inicio || g.fim || g.total);
+  }
+
+  function validarGrupos(){
+    if($("grupo_status").value !== "Sim") return true;
+    const gs = coletarGrupos();
+    if(gs.length === 0) return false;
+    for(const g of gs){
+      if(isBlank(g.grupo) || isBlank(g.inicio) || isBlank(g.fim) || isBlank(g.total)) return false;
+    }
+    return true;
+  }
+
+  // ========= INSPEÇÃO =========
+  $("insp_status").addEventListener("change", () => {
+    const sim = $("insp_status").value === "Sim";
+    $("insp_box").style.display = sim ? "block" : "none";
+    if(!sim) $("insp_dados").value = "";
+  });
+  function validarInspecao(){
+    if(isBlank($("insp_status").value)) return false;
+    if($("insp_status").value === "Sim" && isBlank($("insp_dados").value)) return false;
+    return true;
+  }
+
+  // ========= GRANDEZAS ELÉTRICAS =========
+  $("medir_status").addEventListener("change", () => {
+    const sim = $("medir_status").value === "Sim";
+    $("medir_box").style.display = sim ? "block" : "none";
+    if(!sim) $("medir_dados").value = "";
+  });
+  function validarEletrica(){
+    if(isBlank($("medir_status").value)) return false;
+    if($("medir_status").value === "Sim" && isBlank($("medir_dados").value)) return false;
+    return true;
+  }
+
+  // ========= HIDRÁULICA =========
+  $("hid_status").addEventListener("change", () => {
+    const sim = $("hid_status").value === "Sim";
+    $("hid_box").style.display = sim ? "block" : "none";
+    if(!sim) $("hid_dados").value = "";
+  });
+  function validarHidraulica(){
+    if(isBlank($("hid_status").value)) return false;
+    if($("hid_status").value === "Sim" && isBlank($("hid_dados").value)) return false;
+    return true;
+  }
+
+  // ========= MATERIAIS =========
+  $("mat_status").addEventListener("change", () => {
+    const sim = $("mat_status").value === "Sim";
+    $("mat_box").style.display = sim ? "block" : "none";
+    if(!sim) $("mat_dados").value = "";
+  });
+  function validarMateriais(){
+    if(isBlank($("mat_status").value)) return false;
+    if($("mat_status").value === "Sim" && isBlank($("mat_dados").value)) return false;
+    return true;
+  }
+
+  // ========= ASSINATURA (MOUSE + TOUCH) =========
+  const canvas = $("sign");
+  const ctx = canvas.getContext("2d");
+
+  function resizeCanvas(){
+    const r = window.devicePixelRatio || 1;
+    canvas.width = canvas.offsetWidth * r;
+    canvas.height = canvas.offsetHeight * r;
+    ctx.setTransform(r,0,0,r,0,0);
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#000";
+  }
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+
+  let desenhando = false;
+
+  function getPos(e){
+    const rect = canvas.getBoundingClientRect();
+    if(e.touches && e.touches[0]){
+      return [e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top];
+    }
+    return [e.clientX - rect.left, e.clientY - rect.top];
+  }
+
+  function startDraw(e){
+    e.preventDefault();
+    desenhando = true;
+    ctx.beginPath();
+    const [x,y] = getPos(e);
+    ctx.moveTo(x,y);
+  }
+  function moveDraw(e){
+    if(!desenhando) return;
+    e.preventDefault();
+    const [x,y] = getPos(e);
+    ctx.lineTo(x,y);
+    ctx.stroke();
+  }
+  function endDraw(){ desenhando = false; }
+
+  canvas.addEventListener("mousedown", startDraw);
+  canvas.addEventListener("mousemove", moveDraw);
+  canvas.addEventListener("mouseup", endDraw);
+  canvas.addEventListener("mouseleave", endDraw);
+  canvas.addEventListener("touchstart", startDraw, {passive:false});
+  canvas.addEventListener("touchmove", moveDraw, {passive:false});
+  canvas.addEventListener("touchend", endDraw);
+
+  $("limpar").addEventListener("click", () => ctx.clearRect(0,0,canvas.width,canvas.height));
+
+  function assinaturaVazia(){
+    const pixels = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+    for(let i=3;i<pixels.length;i+=4){
+      if(pixels[i] !== 0) return false; // alpha != 0 => tem desenho
+    }
+    return true;
+  }
+
+  // ========= FOTOS =========
+  let imagens = []; // {dataUrl, name}
+  $("fotos").addEventListener("change", (e) => {
+    imagens = [];
+    $("preview").innerHTML = "";
+    [...e.target.files].forEach(file => {
+      const r = new FileReader();
+      r.onload = (x) => {
+        imagens.push({ dataUrl: x.target.result, name: file.name });
+        const im = document.createElement("img");
+        im.src = x.target.result;
+        $("preview").appendChild(im);
+      };
+      r.readAsDataURL(file);
+    });
+  });
+
+  // ========= PDF MELHORADO (IMAGENS SEM DEFORMAR) =========
+  function loadImage(dataUrl){
+    return new Promise((resolve, reject)=>{
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = dataUrl;
+    });
+  }
+
+  function fitRect(imgW, imgH, boxW, boxH){
+    const imgRatio = imgW / imgH;
+    const boxRatio = boxW / boxH;
+    let w, h;
+    if(imgRatio > boxRatio){
+      w = boxW;
+      h = boxW / imgRatio;
+    }else{
+      h = boxH;
+      w = boxH * imgRatio;
+    }
+    return { w, h };
+  }
+
+  function ensureSpace(doc, y, needed, topY=20, bottomLimit=280){
+    if(y + needed > bottomLimit){
+      doc.addPage();
+      return topY;
+    }
+    return y;
+  }
+
+  async function fetchAsDataURL(url){
+    const res = await fetch(url);
+    const blob = await res.blob();
+    return await new Promise((resolve)=>{
+      const fr = new FileReader();
+      fr.onload = () => resolve(fr.result);
+      fr.readAsDataURL(blob);
+    });
+  }
+
+  // ========= VALIDAÇÃO GERAL =========
+  function validarFormulario(){
+    if(isBlank($("instalacao").value) || isBlank($("municipio").value) || isBlank($("os").value)) return {ok:false, msg:"Preencha Instalação, Município e OS SAP."};
+    if(isBlank($("nome1").value) || isBlank($("nome2").value)) return {ok:false, msg:"Preencha Nome 1 e Nome 2 da equipe."};
+    if(isBlank($("apr").value) || isBlank($("lpe").value) || isBlank($("pet").value)) return {ok:false, msg:"Preencha APR, LPE e PET."};
+    if(isBlank($("ocorrencia").value) || isBlank($("resumo").value)) return {ok:false, msg:"Preencha Ocorrência e Situação encontrada."};
+    if(isBlank($("responsavel").value)) return {ok:false, msg:"Preencha o Responsável."};
+
+    if(isBlank($("hora_inicio").value) || isBlank($("hora_fim").value)) return {ok:false, msg:"Preencha Horário inicial e Horário final da atividade."};
+    const tempoAtv = calcDuracaoHHMM($("hora_inicio").value, $("hora_fim").value);
+    if(isBlank(tempoAtv)) return {ok:false, msg:"Verifique Horário inicial/final da atividade."};
+
+    if(imagens.length === 0) return {ok:false, msg:"Inclua pelo menos 1 foto (obrigatório)."};
+    if(isBlank($("grupo_status").value)) return {ok:false, msg:"Informe a indisponibilidade (Sim/Não) em Estação/Grupo."};
+    if(!validarGrupos()) return {ok:false, msg:"Preencha todos os grupos com início/fim/total."};
+
+    if(!validarInspecao()) return {ok:false, msg:"Preencha Inspeção (Sim/Não) e, se Sim, descreva."};
+    if(!validarEletrica()) return {ok:false, msg:"Preencha Grandezas Elétricas (Sim/Não) e, se Sim, informe medições."};
+    if(!validarHidraulica()) return {ok:false, msg:"Preencha Inspeção Hidráulica (Sim/Não) e, se Sim, informe valores."};
+    if(!validarMateriais()) return {ok:false, msg:"Preencha Materiais (Sim/Não) e, se Sim, descreva."};
+
+    if(assinaturaVazia()) return {ok:false, msg:"Assinatura obrigatória. Assine no campo."};
+
+    return {ok:true, msg:"OK"};
+  }
+
+  // ========= TEXTO WHATS =========
+  function buildWhatsText(){
+    const parts = [];
+    parts.push("OM RP ENGENHARIA");
+    parts.push(`OS: ${$("os").value}`);
+    parts.push(`Instalação: ${$("instalacao").value}`);
+    parts.push(`Município: ${$("municipio").value}`);
+    if(!isBlank($("data").value)) parts.push(`Data: ${$("data").value}`);
+    if(!isBlank($("hora").value)) parts.push(`Hora: ${$("hora").value}`);
+
+    parts.push(`Horário inicial: ${$("hora_inicio").value}`);
+    parts.push(`Horário final: ${$("hora_fim").value}`);
+    parts.push(`Tempo de atividade: ${$("tempo_atividade").value}`);
+
+    parts.push(`Equipe: ${listarEquipe().join(" / ")}`);
+
+    parts.push(`Indisponibilidade Estação/Grupo: ${$("grupo_status").value}`);
+    if($("grupo_status").value === "Sim"){
+      coletarGrupos().forEach((g, idx)=>{
+        parts.push(`#${idx+1} - ${g.grupo} - Início ${g.inicio} - Fim ${g.fim} - Total ${g.total}`);
+      });
+    }
+
+    parts.push(`Inspeção: ${$("insp_status").value}`);
+    if($("insp_status").value === "Sim") parts.push(`Inspeção (descrição): ${$("insp_dados").value}`);
+
+    parts.push(`Grandezas elétricas: ${$("medir_status").value}`);
+    if($("medir_status").value === "Sim") parts.push(`Medições elétricas: ${$("medir_dados").value}`);
+
+    parts.push(`Inspeção hidráulica: ${$("hid_status").value}`);
+    if($("hid_status").value === "Sim") parts.push(`Medições hidráulicas: ${$("hid_dados").value}`);
+
+    parts.push(`Materiais: ${$("mat_status").value}`);
+    if($("mat_status").value === "Sim") parts.push(`Materiais (descrição): ${$("mat_dados").value}`);
+
+    parts.push(`Ocorrência: ${$("ocorrencia").value}`);
+    parts.push(`Situação encontrada: ${$("resumo").value}`);
+    if(!isBlank($("realizado").value)) parts.push(`Serviço realizado: ${$("realizado").value}`);
+
+    parts.push(`Responsável: ${$("responsavel").value}`);
+    return parts.join("\n");
+  }
+
+  // ========= GERA PDF (BLOB) =========
+  async function gerarPDFBlob(){
+    const v = validarFormulario();
+    if(!v.ok){
+      alert(v.msg);
+      throw new Error(v.msg);
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "mm", format: "a4", compress: true });
+
+    // logo no PDF
+    let logo = "";
+    try { logo = await fetchAsDataURL("RP.jpg"); } catch(e) {}
+    if(logo){
+      try { doc.addImage(logo, "JPEG", 10, 8, 190, 22); }
+      catch(e){ doc.addImage(logo, "PNG", 10, 8, 190, 22); }
+    }
+
+    doc.setFontSize(14);
+    doc.text("ORDEM DE MANUTENÇÃO - RP ENGENHARIA", 105, 36, { align: "center" });
+    doc.setFontSize(9);
+    doc.text("Desenvolvido por Lucas Moreira Rodrigues", 105, 41, { align: "center" });
+
+    const equipe = listarEquipe().join(" / ");
+    const tempoAtv = $("tempo_atividade").value;
+
+    const dados = [
+      ["Instalação", $("instalacao").value],
+      ["Município", $("municipio").value],
+      ["OS SAP", $("os").value],
+      ["Data", $("data").value || ""],
+      ["Hora", $("hora").value || ""],
+      ["Horário inicial", $("hora_inicio").value],
+      ["Horário final", $("hora_fim").value],
+      ["Tempo de atividade", tempoAtv],
+      ["APR", $("apr").value || ""],
+      ["LPE", $("lpe").value || ""],
+      ["PET", $("pet").value || ""],
+      ["Equipe", equipe],
+      ["Indisponibilidade Estação/Grupo", $("grupo_status").value],
+      ["Inspeção", $("insp_status").value],
+      ["Grandezas elétricas", $("medir_status").value],
+      ["Inspeção hidráulica", $("hid_status").value],
+      ["Materiais", $("mat_status").value],
+    ];
+
+    if($("insp_status").value === "Sim") dados.push(["Inspeção (descrição)", $("insp_dados").value]);
+    if($("medir_status").value === "Sim") dados.push(["Medições elétricas", $("medir_dados").value]);
+    if($("hid_status").value === "Sim") dados.push(["Medições hidráulicas", $("hid_dados").value]);
+    if($("mat_status").value === "Sim") dados.push(["Materiais (descrição)", $("mat_dados").value]);
+
+    doc.autoTable({
+      startY: 46,
+      head: [["Campo", "Valor"]],
+      body: dados,
+      styles: { fontSize: 9, cellPadding: 2 },
+      headStyles: { fillColor: [11, 61, 145] },
+      theme: "grid"
+    });
+
+    let y = doc.lastAutoTable.finalY + 6;
+
+    // tabela grupos
+    if($("grupo_status").value === "Sim"){
+      const body = coletarGrupos().map(g => [g.grupo, g.inicio, g.fim, g.total]);
+      doc.setFontSize(11);
+      doc.text("Detalhamento de Indisponibilidade - Estação/Grupo", 10, y);
+      y += 2;
+
+      doc.autoTable({
+        startY: y + 2,
+        head: [["Grupo", "Hora Início", "Hora Fim", "Total (HH:MM)"]],
+        body,
+        styles: { fontSize: 9, cellPadding: 2 },
+        headStyles: { fillColor: [11, 61, 145] },
+        theme: "grid"
+      });
+      y = doc.lastAutoTable.finalY + 6;
+    }
+
+    // serviços
+    doc.setFontSize(11);
+    doc.text("Serviços", 10, y);
+    y += 4;
+
+    const blocos = [
+      ["Ocorrência", $("ocorrencia").value],
+      ["Situação encontrada", $("resumo").value],
+      ["Serviço realizado", $("realizado").value || ""]
+    ];
+
+    doc.setFontSize(9);
+    for(const [tit, txt] of blocos){
+      y = ensureSpace(doc, y, 25, 20, 280);
+      doc.setFont(undefined, "bold");
+      doc.text(tit + ":", 10, y);
+      y += 4;
+      doc.setFont(undefined, "normal");
+
+      const lines = doc.splitTextToSize(txt || "", 190);
+      doc.text(lines, 10, y);
+      y += Math.max(6, lines.length * 4) + 3;
+    }
+
+    // responsável + assinatura
+    y = ensureSpace(doc, y, 45, 20, 280);
+    doc.setFont(undefined, "bold");
+    doc.text("Responsável: ", 10, y);
+    doc.setFont(undefined, "normal");
+    doc.text($("responsavel").value, 35, y);
+    y += 8;
+
+    doc.setFont(undefined, "bold");
+    doc.text("Assinatura:", 10, y);
+    doc.setFont(undefined, "normal");
+    y += 2;
+
+    const signData = canvas.toDataURL("image/png");
+    doc.addImage(signData, "PNG", 10, y, 80, 30);
+    y += 38;
+
+    // fotos (SEM DEFORMAR)
+    doc.setFont(undefined, "bold");
+    doc.setFontSize(11);
+    doc.text("Fotos", 10, y);
+    doc.setFont(undefined, "normal");
+    y += 6;
+
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const marginX = 10;
+    const marginTop = 20;
+    const marginBottom = 15;
+
+    const boxW = pageW - marginX*2; // ~190
+    const boxH = 120;
+
+    for(let i=0; i<imagens.length; i++){
+      y = ensureSpace(doc, y, (boxH + 14), marginTop, pageH - marginBottom);
+
+      doc.setFontSize(9);
+      doc.text(`Foto ${i+1}`, marginX, y);
+      y += 4;
+
+      const imgEl = await loadImage(imagens[i].dataUrl);
+      const fitted = fitRect(imgEl.naturalWidth, imgEl.naturalHeight, boxW, boxH);
+
+      const xImg = marginX + (boxW - fitted.w)/2;
+      const yImg = y + (boxH - fitted.h)/2;
+
+      doc.setDrawColor(220);
+      doc.rect(marginX, y, boxW, boxH);
+
+      try{
+        doc.addImage(imagens[i].dataUrl, "JPEG", xImg, yImg, fitted.w, fitted.h, undefined, "FAST");
+      }catch(e){
+        doc.addImage(imagens[i].dataUrl, "PNG", xImg, yImg, fitted.w, fitted.h);
+      }
+
+      y += boxH + 8;
+    }
+
+    const osSafe = limparTextoArquivo($("os").value) || "SEM_OS";
+    const filename = `OM_${dataHoraArquivo()}_${osSafe}.pdf`;
+    const blob = doc.output("blob");
+    return { blob, filename };
+  }
+
+  // ========= PDF (download) =========
+  async function gerarPDF(){
+    const { blob, filename } = await gerarPDFBlob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // ========= EXCEL (1 ABA FORMATADA - sem imagem) =========
+  async function gerarExcel(){
+    const v = validarFormulario();
+    if(!v.ok){ alert(v.msg); return; }
+
+    const tempoAtv = $("tempo_atividade").value;
+    const gruposTexto = $("grupo_status").value === "Sim"
+      ? coletarGrupos().map(g => `${g.grupo} (${g.inicio}–${g.fim} = ${g.total})`).join(" | ")
+      : "";
+
+    const linhas = [
+      ["RP ENGENHARIA", ""],
+      ["ORDEM DE MANUTENÇÃO", ""],
+      ["Desenvolvido por Lucas Moreira Rodrigues", ""],
+      ["", ""],
+      ["Campo", "Valor"],
+
+      ["Instalação", $("instalacao").value],
+      ["Município", $("municipio").value],
+      ["OS SAP", $("os").value],
+      ["Data", $("data").value || ""],
+      ["Hora", $("hora").value || ""],
+      ["Horário inicial", $("hora_inicio").value],
+      ["Horário final", $("hora_fim").value],
+      ["Tempo de atividade", tempoAtv],
+
+      ["APR", $("apr").value],
+      ["LPE", $("lpe").value],
+      ["PET", $("pet").value],
+      ["Equipe", listarEquipe().join(" / ")],
+
+      ["Indisponibilidade Estação/Grupo", $("grupo_status").value],
+      ["Grupos (detalhe)", gruposTexto],
+
+      ["Inspeção", $("insp_status").value],
+      ["Inspeção (descrição)", $("insp_status").value === "Sim" ? $("insp_dados").value : ""],
+
+      ["Grandezas elétricas", $("medir_status").value],
+      ["Medições elétricas", $("medir_status").value === "Sim" ? $("medir_dados").value : ""],
+
+      ["Inspeção hidráulica", $("hid_status").value],
+      ["Medições hidráulicas", $("hid_status").value === "Sim" ? $("hid_dados").value : ""],
+
+      ["Materiais", $("mat_status").value],
+      ["Materiais (descrição)", $("mat_status").value === "Sim" ? $("mat_dados").value : ""],
+
+      ["Ocorrência", $("ocorrencia").value],
+      ["Situação encontrada", $("resumo").value],
+      ["Serviço realizado", $("realizado").value || ""],
+
+      ["Responsável", $("responsavel").value],
+      ["Registro gerado em", new Date().toLocaleString("pt-BR")]
+    ];
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(linhas);
+
+    ws["!merges"] = [
+      { s:{r:0,c:0}, e:{r:0,c:1} },
+      { s:{r:1,c:0}, e:{r:1,c:1} },
+      { s:{r:2,c:0}, e:{r:2,c:1} }
+    ];
+    ws["!cols"] = [{ wch: 30 }, { wch: 100 }];
+
+    XLSX.utils.book_append_sheet(wb, ws, "OM_Controle");
+
+    const osSafe = limparTextoArquivo($("os").value) || "SEM_OS";
+    const excelName = `OM_${dataHoraArquivo()}_${osSafe}.xlsx`;
+    XLSX.writeFile(wb, excelName);
+  }
+
+  // ========= WHATS =========
+  async function enviarWhats(){
+    const v = validarFormulario();
+    if(!v.ok){ alert(v.msg); return; }
+
+    const texto = buildWhatsText();
+    const { blob, filename } = await gerarPDFBlob();
+    const file = new File([blob], filename, { type: "application/pdf" });
+
+    // Mobile: tenta compartilhar com anexo
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try{
+        await navigator.share({
+          title: "OM RP Engenharia",
+          text: texto,
+          files: [file]
+        });
+        return;
+      }catch(e){}
+    }
+
+    // Desktop fallback: baixa e abre wa.me com mensagem
+    await gerarPDF();
+    const link = "https://wa.me/" + WHATS_PHONE + "?text=" + encodeURIComponent(
+      texto + "\n\nPDF gerado: " + filename + "\n(Anexe o arquivo baixado aqui.)"
+    );
+    window.open(link, "_blank");
+  }
+
+  // ========= BOTOES =========
+  $("pdf").addEventListener("click", gerarPDF);
+  $("excel").addEventListener("click", gerarExcel);
+  $("whats").addEventListener("click", enviarWhats);
+
+});
 </script>
+
 </body>
 </html>
