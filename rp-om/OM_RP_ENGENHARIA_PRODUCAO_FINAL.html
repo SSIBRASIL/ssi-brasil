@@ -8,20 +8,41 @@
 <style>
   body{font-family:Arial;background:#eef2f6;margin:0;padding:10px}
   .container{max-width:1100px;margin:auto;background:#fff;padding:15px;border-radius:12px}
-  .topo-img{width:100%;height:130px;object-fit:cover;display:block;margin-bottom:10px;border-radius:10px}
+
+  .topo-img{
+    width:100%;
+    height:130px;
+    object-fit:cover;
+    display:block;
+    margin-bottom:10px;
+    border-radius:10px;
+  }
+
   h2{background:#0b3d91;color:#fff;padding:8px;border-radius:6px;font-size:16px;margin:14px 0 10px}
   .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
   @media(max-width:768px){.grid{grid-template-columns:1fr}}
+
   .campo{display:flex;flex-direction:column;font-size:13px;font-weight:bold}
   .campo span{margin-bottom:2px;color:#0b3d91}
   input,select,textarea{width:100%;padding:8px;border-radius:6px;border:1px solid #aaa;font-weight:normal;box-sizing:border-box}
   textarea{min-height:70px}
+
   button{width:100%;margin-top:10px;background:#0b3d91;color:#fff;border:none;padding:12px;border-radius:8px;font-size:16px;cursor:pointer}
   .btn-sec{background:#1d6fd8}
   .btn-danger{background:#b42318}
-  canvas{border:1px solid #333;border-radius:8px;width:100%;height:180px;background:#fff;touch-action:none}
+
+  canvas{
+    border:1px solid #333;
+    border-radius:8px;
+    width:100%;
+    height:180px;
+    background:#fff;
+    touch-action:none;
+  }
+
   .photo-preview img{height:70px;margin:4px;border-radius:6px;border:1px solid #ccc}
   .nota{font-size:12px;color:#444;margin-top:8px}
+
   .group-row{
     display:grid;
     grid-template-columns: 1.2fr 1fr 1fr 1fr 0.8fr;
@@ -31,8 +52,10 @@
   }
   @media(max-width:768px){.group-row{grid-template-columns:1fr}}
   .group-row .remover{height:38px;margin-top:0}
+
   .team-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
   @media(max-width:768px){.team-row{grid-template-columns:1fr}}
+
   .team-extra-row{
     display:grid;
     grid-template-columns: 1fr 0.8fr;
@@ -47,8 +70,7 @@
 
 <body>
 <div class="container">
-
-  <img src="RP.jpg" class="topo-img" alt="RP Engenharia">
+  <img src="RP.jpg" id="logoTopo" class="topo-img" alt="RP Engenharia">
 
   <h2>Dados Gerais</h2>
   <div class="grid">
@@ -57,7 +79,6 @@
     <div class="campo"><span>OS SAP *</span><input id="os"></div>
     <div class="campo"><span>Data</span><input type="date" id="data"></div>
 
-    <!-- Mantém só Horário inicial (sem campo Hora e sem tempo de atividade aqui) -->
     <div class="campo"><span>Horário inicial *</span><input type="time" id="hora_inicio"></div>
     <div class="campo"><span></span><div style="height:38px"></div></div>
     <div class="campo"><span></span><div style="height:38px"></div></div>
@@ -98,7 +119,6 @@
     <div id="lista_grupos"></div>
   </div>
 
-  <!-- INSPEÇÃO (antes de elétrica) -->
   <h2>Inspeção</h2>
   <div class="campo">
     <span>Necessário realizar inspeção? *</span>
@@ -175,7 +195,6 @@
   <h2>Responsável</h2>
   <div class="campo"><span>Nome do responsável *</span><input id="responsavel"></div>
 
-  <!-- Tempo de atividade apenas aqui no final -->
   <h2>Encerramento</h2>
   <div class="grid">
     <div class="campo"><span>Horário final da atividade *</span><input type="time" id="hora_fim"></div>
@@ -192,9 +211,8 @@
   <button type="button" id="whats">📲 ENVIAR WHATSAPP</button>
 
   <div class="nota">
-    * No celular, o envio tenta anexar o PDF automaticamente via compartilhamento. No PC, o WhatsApp abre com a mensagem pronta e o anexo é manual.
+    * Para anexar PDF automaticamente no WhatsApp (mobile), abra este HTML em HTTPS (hospedado/PWA).
   </div>
-
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -203,7 +221,7 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  const WHATS_PHONE = "5511981374513"; // troque aqui
+  const WHATS_PHONE = "5511981374513";
   const $ = (id) => document.getElementById(id);
   const isBlank = (v) => !v || !String(v).trim();
 
@@ -216,7 +234,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const mi = String(d.getMinutes()).padStart(2,"0");
     return `${yyyy}${mm}${dd}_${hh}${mi}`;
   }
-
   function limparTextoArquivo(s){
     return (s || "").toString().trim().replace(/[^\w\-]+/g, "_").replace(/_+/g, "_").replace(/^_+|_+$/g, "");
   }
@@ -225,25 +242,23 @@ document.addEventListener("DOMContentLoaded", () => {
     if(!inicio || !fim) return "";
     const [hi, mi] = inicio.split(":").map(Number);
     const [hf, mf] = fim.split(":").map(Number);
+    if([hi,mi,hf,mf].some(n => Number.isNaN(n))) return "";
     let start = hi*60 + mi, end = hf*60 + mf;
     let diff = end - start;
     if(diff < 0) diff += 1440;
     const h = Math.floor(diff/60), m = diff % 60;
     return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
   }
-
   function atualizarTempoAtividade(){
     $("tempo_atividade").value = calcDuracaoHHMM($("hora_inicio").value, $("hora_fim").value);
   }
   $("hora_inicio").addEventListener("change", atualizarTempoAtividade);
   $("hora_fim").addEventListener("change", atualizarTempoAtividade);
 
-  // Equipe
+  // equipe
   const teamExtras = $("team_extras");
-  const btnAddTeam = $("btn_add_team");
   let teamExtraCount = 0;
-
-  btnAddTeam.addEventListener("click", () => {
+  $("btn_add_team").addEventListener("click", () => {
     teamExtraCount++;
     const row = document.createElement("div");
     row.className = "team-extra-row";
@@ -259,15 +274,14 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function listarEquipe(){
-    const extras = [...teamExtras.querySelectorAll('[data-role="team-extra"]')].map(i => i.value).filter(v => !isBlank(v));
+    const extras = [...teamExtras.querySelectorAll('[data-role="team-extra"]')]
+      .map(i => i.value).filter(v => !isBlank(v));
     return [$("nome1").value, $("nome2").value, ...extras].filter(v => !isBlank(v));
   }
 
-  // Grupos
+  // grupos
   const gruposBox = $("grupos_box");
   const listaGrupos = $("lista_grupos");
-  const btnAddGrupo = $("btn_add_grupo");
-
   function limparGrupos(){ listaGrupos.innerHTML = ""; }
 
   function criarLinhaGrupo(){
@@ -292,8 +306,8 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
 
     const inInicio = row.querySelector('[data-role="inicio"]');
-    const inFim = row.querySelector('[data-role="fim"]');
-    const inTotal = row.querySelector('[data-role="total"]');
+    const inFim    = row.querySelector('[data-role="fim"]');
+    const inTotal  = row.querySelector('[data-role="total"]');
     const atualizar = () => { inTotal.value = calcDuracaoHHMM(inInicio.value, inFim.value); };
     inInicio.addEventListener("change", atualizar);
     inFim.addEventListener("change", atualizar);
@@ -302,13 +316,13 @@ document.addEventListener("DOMContentLoaded", () => {
     listaGrupos.appendChild(row);
   }
 
+  $("btn_add_grupo").addEventListener("click", criarLinhaGrupo);
   $("grupo_status").addEventListener("change", () => {
     const sim = $("grupo_status").value === "Sim";
     gruposBox.style.display = sim ? "block" : "none";
     if(!sim) limparGrupos();
     else if(listaGrupos.children.length === 0) criarLinhaGrupo();
   });
-  btnAddGrupo.addEventListener("click", criarLinhaGrupo);
 
   function coletarGrupos(){
     return [...listaGrupos.querySelectorAll(".group-row")]
@@ -331,37 +345,25 @@ document.addEventListener("DOMContentLoaded", () => {
     return true;
   }
 
-  // Boxes Sim/Não
-  $("insp_status").addEventListener("change", () => {
-    const sim = $("insp_status").value === "Sim";
-    $("insp_box").style.display = sim ? "block" : "none";
-    if(!sim) $("insp_dados").value = "";
-  });
-  $("medir_status").addEventListener("change", () => {
-    const sim = $("medir_status").value === "Sim";
-    $("medir_box").style.display = sim ? "block" : "none";
-    if(!sim) $("medir_dados").value = "";
-  });
-  $("hid_status").addEventListener("change", () => {
-    const sim = $("hid_status").value === "Sim";
-    $("hid_box").style.display = sim ? "block" : "none";
-    if(!sim) $("hid_dados").value = "";
-  });
-  $("mat_status").addEventListener("change", () => {
-    const sim = $("mat_status").value === "Sim";
-    $("mat_box").style.display = sim ? "block" : "none";
-    if(!sim) $("mat_dados").value = "";
-  });
+  // boxes
+  function toggleBox(selId, boxId, clearId){
+    $(selId).addEventListener("change", () => {
+      const sim = $(selId).value === "Sim";
+      $(boxId).style.display = sim ? "block" : "none";
+      if(!sim && clearId) $(clearId).value = "";
+    });
+  }
+  toggleBox("insp_status","insp_box","insp_dados");
+  toggleBox("medir_status","medir_box","medir_dados");
+  toggleBox("hid_status","hid_box","hid_dados");
+  toggleBox("mat_status","mat_box","mat_dados");
 
-  // Assinatura touch + mouse (mantido)
+  // assinatura (pointer events)
   const canvas = $("sign");
   const ctx = canvas.getContext("2d");
-
   function resizeCanvas(){
-    const r = window.devicePixelRatio || 1;
-    canvas.width = canvas.offsetWidth * r;
-    canvas.height = canvas.offsetHeight * r;
-    ctx.setTransform(r,0,0,r,0,0);
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
     ctx.strokeStyle = "#000";
@@ -369,51 +371,42 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("resize", resizeCanvas);
   resizeCanvas();
 
-  let desenhando = false;
-
-  function getPos(e){
+  let drawing = false;
+  function pointFromEvent(e){
     const rect = canvas.getBoundingClientRect();
-    if(e.touches && e.touches[0]){
-      return [e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top];
-    }
-    return [e.clientX - rect.left, e.clientY - rect.top];
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
   }
-
-  function startDraw(e){
+  canvas.addEventListener("pointerdown", (e) => {
     e.preventDefault();
-    desenhando = true;
+    canvas.setPointerCapture(e.pointerId);
+    drawing = true;
+    const p = pointFromEvent(e);
     ctx.beginPath();
-    const [x,y] = getPos(e);
-    ctx.moveTo(x,y);
-  }
-  function moveDraw(e){
-    if(!desenhando) return;
+    ctx.moveTo(p.x, p.y);
+  });
+  canvas.addEventListener("pointermove", (e) => {
+    if(!drawing) return;
     e.preventDefault();
-    const [x,y] = getPos(e);
-    ctx.lineTo(x,y);
+    const p = pointFromEvent(e);
+    ctx.lineTo(p.x, p.y);
     ctx.stroke();
-  }
-  function endDraw(){ desenhando = false; }
-
-  canvas.addEventListener("mousedown", startDraw);
-  canvas.addEventListener("mousemove", moveDraw);
-  canvas.addEventListener("mouseup", endDraw);
-  canvas.addEventListener("mouseleave", endDraw);
-  canvas.addEventListener("touchstart", startDraw, {passive:false});
-  canvas.addEventListener("touchmove", moveDraw, {passive:false});
-  canvas.addEventListener("touchend", endDraw);
+  });
+  function stopDraw(e){ if(!drawing) return; e.preventDefault(); drawing = false; }
+  canvas.addEventListener("pointerup", stopDraw);
+  canvas.addEventListener("pointercancel", stopDraw);
+  canvas.addEventListener("pointerleave", stopDraw);
 
   $("limpar").addEventListener("click", () => ctx.clearRect(0,0,canvas.width,canvas.height));
 
   function assinaturaVazia(){
-    const pixels = ctx.getImageData(0,0,canvas.width,canvas.height).data;
-    for(let i=3;i<pixels.length;i+=4){
-      if(pixels[i] !== 0) return false;
+    const img = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+    for(let i=3;i<img.length;i+=4){
+      if(img[i] !== 0) return false;
     }
     return true;
   }
 
-  // Fotos
+  // fotos
   let imagens = [];
   $("fotos").addEventListener("change", (e) => {
     imagens = [];
@@ -421,7 +414,7 @@ document.addEventListener("DOMContentLoaded", () => {
     [...e.target.files].forEach(file => {
       const r = new FileReader();
       r.onload = (x) => {
-        imagens.push({ dataUrl: x.target.result, name: file.name });
+        imagens.push(x.target.result);
         const im = document.createElement("img");
         im.src = x.target.result;
         $("preview").appendChild(im);
@@ -430,7 +423,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // PDF helpers
+  // helpers pdf
   function loadImage(dataUrl){
     return new Promise((resolve, reject)=>{
       const img = new Image();
@@ -447,18 +440,25 @@ document.addEventListener("DOMContentLoaded", () => {
     else { h = boxH; w = boxH * imgRatio; }
     return { w, h };
   }
-  function ensureSpace(doc, y, needed, topY=20, bottomLimit=280){
-    if(y + needed > bottomLimit){ doc.addPage(); return topY; }
-    return y;
-  }
-  async function fetchAsDataURL(url){
-    const res = await fetch(url);
-    const blob = await res.blob();
-    return await new Promise((resolve)=>{
-      const fr = new FileReader();
-      fr.onload = () => resolve(fr.result);
-      fr.readAsDataURL(blob);
-    });
+
+  // logo seguro
+  async function getLogoDataURLSafe(){
+    try{
+      const img = $("logoTopo");
+      if(!img) return "";
+      if(!img.complete || img.naturalWidth === 0){
+        await new Promise((resolve)=>{ img.onload=resolve; img.onerror=resolve; });
+      }
+      if(img.naturalWidth === 0) return "";
+      const c = document.createElement("canvas");
+      c.width = img.naturalWidth;
+      c.height = img.naturalHeight;
+      const cx = c.getContext("2d");
+      cx.drawImage(img, 0, 0);
+      return c.toDataURL("image/jpeg", 0.92);
+    }catch(e){
+      return "";
+    }
   }
 
   function validarFormulario(){
@@ -467,22 +467,24 @@ document.addEventListener("DOMContentLoaded", () => {
     atualizarTempoAtividade();
     if(isBlank($("tempo_atividade").value)) return {ok:false,msg:"Verifique os horários da atividade."};
 
-    if(isBlank($("nome1").value) || isBlank($("nome2").value)) return {ok:false,msg:"Preencha Nome 1 e Nome 2."};
     if(isBlank($("apr").value) || isBlank($("lpe").value) || isBlank($("pet").value)) return {ok:false,msg:"Preencha APR, LPE e PET."};
-    if(isBlank($("grupo_status").value)) return {ok:false,msg:"Informe a Indisponibilidade Estação/Grupo (Sim/Não)."};
-    if(!validarGrupos()) return {ok:false,msg:"Preencha os grupos com início/fim/total."};
+    if(isBlank($("nome1").value) || isBlank($("nome2").value)) return {ok:false,msg:"Preencha Nome 1 e Nome 2."};
 
-    if(isBlank($("insp_status").value) || ($("insp_status").value==="Sim" && isBlank($("insp_dados").value))) return {ok:false,msg:"Preencha Inspeção."};
-    if(isBlank($("medir_status").value) || ($("medir_status").value==="Sim" && isBlank($("medir_dados").value))) return {ok:false,msg:"Preencha Grandezas Elétricas."};
-    if(isBlank($("hid_status").value) || ($("hid_status").value==="Sim" && isBlank($("hid_dados").value))) return {ok:false,msg:"Preencha Inspeção Hidráulica."};
-    if(isBlank($("mat_status").value) || ($("mat_status").value==="Sim" && isBlank($("mat_dados").value))) return {ok:false,msg:"Preencha Materiais."};
+    if(isBlank($("grupo_status").value)) return {ok:false,msg:"Informe a Indisponibilidade Estação/Grupo (Sim/Não)."};
+    if(!validarGrupos()) return {ok:false,msg:"Se Sim, preencha os grupos com início/fim/total."};
+
+    if(isBlank($("insp_status").value) || ($("insp_status").value==="Sim" && isBlank($("insp_dados").value))) return {ok:false,msg:"Preencha Inspeção (e descrição se Sim)."};
+
+    if(isBlank($("medir_status").value) || ($("medir_status").value==="Sim" && isBlank($("medir_dados").value))) return {ok:false,msg:"Preencha Grandezas Elétricas (e medições se Sim)."};
+
+    if(isBlank($("hid_status").value) || ($("hid_status").value==="Sim" && isBlank($("hid_dados").value))) return {ok:false,msg:"Preencha Inspeção Hidráulica (e valores se Sim)."};
+
+    if(isBlank($("mat_status").value) || ($("mat_status").value==="Sim" && isBlank($("mat_dados").value))) return {ok:false,msg:"Preencha Materiais (e descrição se Sim)."};
 
     if(isBlank($("ocorrencia").value) || isBlank($("resumo").value)) return {ok:false,msg:"Preencha Ocorrência e Situação encontrada."};
     if(isBlank($("responsavel").value)) return {ok:false,msg:"Preencha o Responsável."};
-
-    if(imagens.length === 0) return {ok:false,msg:"Inclua pelo menos 1 foto."};
+    if(imagens.length === 0) return {ok:false,msg:"Inclua pelo menos 1 foto (obrigatório)."};
     if(assinaturaVazia()) return {ok:false,msg:"Assinatura obrigatória."};
-
     return {ok:true,msg:"OK"};
   }
 
@@ -516,24 +518,30 @@ document.addEventListener("DOMContentLoaded", () => {
     return parts.join("\n");
   }
 
+  // ✅ PDF com logo em TODAS as páginas + título só na 1ª página
   async function gerarPDFBlob(){
     const v = validarFormulario();
     if(!v.ok){ alert(v.msg); throw new Error(v.msg); }
 
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit: "mm", format: "a4", compress: true });
+    const doc = new jsPDF({ unit:"mm", format:"a4", compress:true });
 
-    let logo = "";
-    try { logo = await fetchAsDataURL("RP.jpg"); } catch(e) {}
-    if(logo){
-      try { doc.addImage(logo, "JPEG", 10, 8, 190, 22); }
-      catch(e){ doc.addImage(logo, "PNG", 10, 8, 190, 22); }
+    const logoData = await getLogoDataURLSafe();
+
+    // Cabeçalho: logo sempre, título somente na 1ª página
+    function drawHeader(pageNumber){
+      if(logoData){
+        try{ doc.addImage(logoData, "JPEG", 10, 8, 190, 22); }catch(e){}
+      }
+      if(pageNumber === 1){
+        doc.setFontSize(14);
+        doc.text("ORDEM DE MANUTENÇÃO - RP ENGENHARIA", 105, 36, { align:"center" });
+        doc.setFontSize(9);
+        doc.text("Desenvolvido por Lucas Moreira Rodrigues", 105, 41, { align:"center" });
+      }
     }
 
-    doc.setFontSize(14);
-    doc.text("ORDEM DE MANUTENÇÃO - RP ENGENHARIA", 105, 36, { align: "center" });
-    doc.setFontSize(9);
-    doc.text("Desenvolvido por Lucas Moreira Rodrigues", 105, 41, { align: "center" });
+    const topMargin = 46; // espaço reservado para o cabeçalho no topo
 
     const equipe = listarEquipe().join(" / ");
     const tempoAtv = $("tempo_atividade").value;
@@ -563,34 +571,60 @@ document.addEventListener("DOMContentLoaded", () => {
     if($("mat_status").value==="Sim") dados.push(["Materiais (descrição)", $("mat_dados").value]);
 
     doc.autoTable({
-      startY: 46,
-      head: [["Campo", "Valor"]],
+      startY: topMargin,
+      margin: { top: topMargin, left: 10, right: 10 },
+      head: [["Campo","Valor"]],
       body: dados,
-      styles: { fontSize: 9, cellPadding: 2 },
-      headStyles: { fillColor: [11, 61, 145] },
-      theme: "grid"
+      styles: { fontSize:9, cellPadding:2 },
+      headStyles: { fillColor:[11,61,145] },
+      theme: "grid",
+      didDrawPage: (data) => {
+        const page = doc.internal.getNumberOfPages();
+        drawHeader(page);
+      }
     });
 
     let y = doc.lastAutoTable.finalY + 6;
 
     if($("grupo_status").value === "Sim"){
       const body = coletarGrupos().map(g => [g.grupo, g.inicio, g.fim, g.total]);
+
       doc.setFontSize(11);
       doc.text("Detalhamento de Indisponibilidade - Estação/Grupo", 10, y);
       y += 2;
 
       doc.autoTable({
         startY: y + 2,
-        head: [["Grupo", "Hora Início", "Hora Fim", "Total (HH:MM)"]],
+        margin: { top: topMargin, left: 10, right: 10 },
+        head: [["Grupo","Hora Início","Hora Fim","Total (HH:MM)"]],
         body,
-        styles: { fontSize: 9, cellPadding: 2 },
-        headStyles: { fillColor: [11, 61, 145] },
-        theme: "grid"
+        styles: { fontSize:9, cellPadding:2 },
+        headStyles: { fillColor:[11,61,145] },
+        theme: "grid",
+        didDrawPage: () => {
+          const page = doc.internal.getNumberOfPages();
+          drawHeader(page);
+        }
       });
       y = doc.lastAutoTable.finalY + 6;
     }
 
+    // Serviços (se quebrar página, o cabeçalho do autoTable já está garantido;
+    // aqui vamos só evitar escrever muito perto do topo)
+    const minY = topMargin + 6;
+    const pageH = doc.internal.pageSize.getHeight();
+
+    function ensureY(need){
+      if(y + need > pageH - 15){
+        doc.addPage();
+        const page = doc.internal.getNumberOfPages();
+        drawHeader(page);
+        y = minY;
+      }
+    }
+
     doc.setFontSize(11);
+    ensureY(12);
     doc.text("Serviços", 10, y);
     y += 4;
 
@@ -602,61 +636,72 @@ document.addEventListener("DOMContentLoaded", () => {
 
     doc.setFontSize(9);
     for(const [tit, txt] of blocos){
-      y = ensureSpace(doc, y, 25, 20, 280);
-      doc.setFont(undefined, "bold");
-      doc.text(tit + ":", 10, y);
+      ensureY(25);
+      doc.setFont(undefined,"bold"); doc.text(tit + ":", 10, y);
       y += 4;
-      doc.setFont(undefined, "normal");
+      doc.setFont(undefined,"normal");
       const lines = doc.splitTextToSize(txt || "", 190);
       doc.text(lines, 10, y);
       y += Math.max(6, lines.length * 4) + 3;
     }
 
-    y = ensureSpace(doc, y, 45, 20, 280);
-    doc.setFont(undefined, "bold");
-    doc.text("Responsável: ", 10, y);
-    doc.setFont(undefined, "normal");
-    doc.text($("responsavel").value, 35, y);
+    ensureY(45);
+    doc.setFont(undefined,"bold"); doc.text("Responsável:", 10, y);
+    doc.setFont(undefined,"normal"); doc.text($("responsavel").value, 35, y);
     y += 8;
 
-    doc.setFont(undefined, "bold");
-    doc.text("Assinatura:", 10, y);
+    doc.setFont(undefined,"bold"); doc.text("Assinatura:", 10, y);
     y += 2;
 
     const signData = canvas.toDataURL("image/png");
     doc.addImage(signData, "PNG", 10, y, 80, 30);
     y += 38;
 
-    doc.setFont(undefined, "bold");
-    doc.setFontSize(11);
+    // Fotos
+    ensureY(20);
+    doc.setFont(undefined,"bold"); doc.setFontSize(11);
     doc.text("Fotos", 10, y);
-    doc.setFont(undefined, "normal");
+    doc.setFont(undefined,"normal");
     y += 6;
 
+    function loadImage(dataUrl){
+      return new Promise((resolve, reject)=>{
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = dataUrl;
+      });
+    }
+    function fitRect(imgW, imgH, boxW, boxH){
+      const imgRatio = imgW / imgH;
+      const boxRatio = boxW / boxH;
+      let w, h;
+      if(imgRatio > boxRatio){ w = boxW; h = boxW / imgRatio; }
+      else { h = boxH; w = boxH * imgRatio; }
+      return { w, h };
+    }
+
     const pageW = doc.internal.pageSize.getWidth();
-    const pageH = doc.internal.pageSize.getHeight();
     const marginX = 10;
-    const marginTop = 20;
-    const marginBottom = 15;
     const boxW = pageW - marginX*2;
     const boxH = 120;
 
     for(let i=0;i<imagens.length;i++){
-      y = ensureSpace(doc, y, (boxH + 14), marginTop, pageH - marginBottom);
+      ensureY(boxH + 14);
       doc.setFontSize(9);
       doc.text(`Foto ${i+1}`, marginX, y);
       y += 4;
 
-      const imgEl = await loadImage(imagens[i].dataUrl);
+      doc.setDrawColor(220);
+      doc.rect(marginX, y, boxW, boxH);
+
+      const imgEl = await loadImage(imagens[i]);
       const fitted = fitRect(imgEl.naturalWidth, imgEl.naturalHeight, boxW, boxH);
       const xImg = marginX + (boxW - fitted.w)/2;
       const yImg = y + (boxH - fitted.h)/2;
 
-      doc.setDrawColor(220);
-      doc.rect(marginX, y, boxW, boxH);
-
-      try{ doc.addImage(imagens[i].dataUrl, "JPEG", xImg, yImg, fitted.w, fitted.h, undefined, "FAST"); }
-      catch(e){ doc.addImage(imagens[i].dataUrl, "PNG", xImg, yImg, fitted.w, fitted.h); }
+      try{ doc.addImage(imagens[i], "JPEG", xImg, yImg, fitted.w, fitted.h, undefined, "FAST"); }
+      catch(e){ doc.addImage(imagens[i], "PNG", xImg, yImg, fitted.w, fitted.h); }
 
       y += boxH + 8;
     }
@@ -668,21 +713,24 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function gerarPDF(){
-    const { blob, filename } = await gerarPDFBlob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+    try{
+      const { blob, filename } = await gerarPDFBlob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }catch(err){
+      console.error(err);
+    }
   }
 
   async function gerarExcel(){
     const v = validarFormulario();
     if(!v.ok){ alert(v.msg); return; }
-
     const tempoAtv = $("tempo_atividade").value;
     const gruposTexto = $("grupo_status").value === "Sim"
       ? coletarGrupos().map(g => `${g.grupo} (${g.inicio}–${g.fim} = ${g.total})`).join(" | ")
@@ -739,21 +787,23 @@ document.addEventListener("DOMContentLoaded", () => {
   async function enviarWhats(){
     const v = validarFormulario();
     if(!v.ok){ alert(v.msg); return; }
-
     const texto = buildWhatsText();
-    const { blob, filename } = await gerarPDFBlob();
-    const file = new File([blob], filename, { type: "application/pdf" });
 
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    let pdfPack = null;
+    try{ pdfPack = await gerarPDFBlob(); } catch(e){ return; }
+
+    const file = new File([pdfPack.blob], pdfPack.filename, { type:"application/pdf" });
+
+    if(navigator.canShare && navigator.canShare({ files:[file] })){
       try{
-        await navigator.share({ title: "OM RP Engenharia", text: texto, files: [file] });
+        await navigator.share({ title:"OM RP Engenharia", text: texto, files:[file] });
         return;
       }catch(e){}
     }
 
     await gerarPDF();
     const link = "https://wa.me/" + WHATS_PHONE + "?text=" + encodeURIComponent(
-      texto + "\n\nPDF gerado: " + filename + "\n(Anexe o arquivo baixado aqui.)"
+      texto + "\n\nPDF gerado: " + pdfPack.filename + "\n(Anexe o arquivo baixado.)"
     );
     window.open(link, "_blank");
   }
