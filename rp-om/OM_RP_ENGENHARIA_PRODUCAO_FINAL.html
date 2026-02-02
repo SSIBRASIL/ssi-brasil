@@ -8,17 +8,32 @@
 <style>
 body{font-family:Arial;background:#eef2f6;margin:0;padding:10px}
 .container{max-width:1100px;margin:auto;background:#fff;padding:15px;border-radius:12px}
-.topo-img{width:100%;max-height:120px;object-fit:contain;display:block;margin-bottom:10px}
+
+/* LOGO TOPO PREENCHENDO */
+.topo-img{
+  width:100%;
+  height:130px;            /* ajuste a altura do topo aqui */
+  object-fit:cover;        /* preenche o topo (pode cortar) */
+  /* object-fit:contain; */ /* se preferir SEM cortar, use contain */
+  display:block;
+  margin-bottom:10px;
+  border-radius:10px;
+}
+
 h2{background:#0b3d91;color:#fff;padding:8px;border-radius:6px;font-size:16px}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 @media(max-width:768px){.grid{grid-template-columns:1fr}}
+
 .campo{display:flex;flex-direction:column;font-size:13px;font-weight:bold}
 .campo span{margin-bottom:2px;color:#0b3d91}
+
 input,select,textarea{width:100%;padding:8px;border-radius:6px;border:1px solid #aaa;font-weight:normal}
 textarea{min-height:60px}
+
 button{width:100%;margin-top:10px;background:#0b3d91;color:#fff;border:none;padding:12px;border-radius:8px;font-size:16px;cursor:pointer}
 .btn-sec{background:#1d6fd8}
 .btn-danger{background:#b42318}
+
 canvas{border:1px solid #333;border-radius:8px;width:100%;height:180px;background:#fff;touch-action:none}
 .photo-preview img{height:70px;margin:4px;border-radius:6px;border:1px solid #ccc}
 .nota{font-size:12px;color:#444;margin-top:8px}
@@ -95,7 +110,7 @@ canvas{border:1px solid #333;border-radius:8px;width:100%;height:180px;backgroun
   <div id="lista_grupos"></div>
 </div>
 
-<!-- ===== GRANDEZAS ELÉTRICAS (MANTIDO COMO ESTAVA) ===== -->
+<!-- ===== GRANDEZAS ELÉTRICAS (MANTIDO) ===== -->
 <h2>Grandezas Elétricas</h2>
 <div class="campo">
   <span>Necessário medir grandezas elétricas? *</span>
@@ -112,9 +127,8 @@ canvas{border:1px solid #333;border-radius:8px;width:100%;height:180px;backgroun
     <textarea id="medir_dados" placeholder="Ex.: Tensão: 380V | Corrente: 22A | Potência: 11kW | FP: 0,92 | Frequência: 60Hz"></textarea>
   </div>
 </div>
-<!-- ===== /ELÉTRICAS ===== -->
 
-<!-- ===== NOVO: INSPEÇÃO HIDRÁULICA ===== -->
+<!-- ===== INSPEÇÃO HIDRÁULICA ===== -->
 <h2>Inspeção Hidráulica</h2>
 <div class="campo">
   <span>Necessário realizar inspeção hidráulica / medir grandezas? *</span>
@@ -131,9 +145,8 @@ canvas{border:1px solid #333;border-radius:8px;width:100%;height:180px;backgroun
     <textarea id="hid_dados" placeholder="Ex.: Pressão: 6,2 bar | Vazão: 18 m³/h | Nível: 72% | Observação: ..."></textarea>
   </div>
 </div>
-<!-- ===== /HIDRÁULICA ===== -->
 
-<!-- ===== NOVO: MATERIAIS ===== -->
+<!-- ===== MATERIAIS ===== -->
 <h2>Materiais</h2>
 <div class="campo">
   <span>Houve materiais substituídos / instalados / retirados? *</span>
@@ -150,11 +163,11 @@ canvas{border:1px solid #333;border-radius:8px;width:100%;height:180px;backgroun
     <textarea id="mat_dados" placeholder="Ex.: Substituído: válvula 2'' | Instalado: manômetro 0-10 bar | Retirado: filtro Y..."></textarea>
   </div>
 </div>
-<!-- ===== /MATERIAIS ===== -->
 
 <h2>Serviços</h2>
+<!-- ORDEM ALTERADA: OCORRÊNCIA PRIMEIRO -->
+<div class="campo"><span>Ocorrência *</span><textarea id="ocorrencia"></textarea></div>
 <div class="campo"><span>Situação encontrada *</span><textarea id="resumo"></textarea></div>
-<div class="campo"><span>Ocorrência</span><textarea id="ocorrencia"></textarea></div>
 <div class="campo"><span>Serviço realizado</span><textarea id="realizado"></textarea></div>
 
 <h2>Fotos (obrigatório)</h2>
@@ -200,487 +213,8 @@ function limparTextoArquivo(s){
     .toString()
     .trim()
     .replace(/[^\w\-]+/g, "_")
-    .replace(/_+/g, "_")
-    .replace(/^_+|_+$/g, "");
-}
-
-// ========= CÁLCULO (HH:MM) =========
-function calcDuracaoHHMM(inicio, fim){
-  if(!inicio || !fim) return "";
-  const [hi, mi] = inicio.split(":").map(Number);
-  const [hf, mf] = fim.split(":").map(Number);
-  if([hi,mi,hf,mf].some(n => Number.isNaN(n))) return "";
-  let start = hi*60 + mi;
-  let end = hf*60 + mf;
-  let diff = end - start;
-  if(diff < 0) diff += 1440;
-  const h = Math.floor(diff/60);
-  const m = diff % 60;
-  return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
-}
-
-// ========= EQUIPE =========
-const teamExtras = document.getElementById("team_extras");
-const btnAddTeam = document.getElementById("btn_add_team");
-let teamExtraCount = 0;
-
-function criarMembroExtra(){
-  teamExtraCount++;
-  const row = document.createElement("div");
-  row.className = "team-extra-row";
-  row.innerHTML = `
-    <div class="campo">
-      <span>Nome ${2 + teamExtraCount}</span>
-      <input data-role="team-extra">
-    </div>
-    <button type="button" class="btn-danger remover" data-role="remover">Remover</button>
-  `;
-  row.querySelector('[data-role="remover"]').addEventListener("click", ()=>row.remove());
-  teamExtras.appendChild(row);
-}
-btnAddTeam.addEventListener("click", criarMembroExtra);
-
-function listarEquipe(){
-  const extras = [...teamExtras.querySelectorAll('[data-role="team-extra"]')]
-    .map(i=>i.value).filter(v=>!isBlank(v));
-  return [nome1.value, nome2.value, ...extras].filter(v=>!isBlank(v));
-}
-
-// ========= GRUPOS =========
-const gruposBox = document.getElementById("grupos_box");
-const listaGrupos = document.getElementById("lista_grupos");
-const btnAddGrupo = document.getElementById("btn_add_grupo");
-
-function limparGrupos(){ listaGrupos.innerHTML = ""; }
-
-function criarLinhaGrupo(){
-  const row = document.createElement("div");
-  row.className = "group-row";
-  row.innerHTML = `
-    <div class="campo">
-      <span>Grupo</span>
-      <select data-role="grupo">
-        <option value="">Selecione</option>
-        <option>Grupo 1</option>
-        <option>Grupo 2</option>
-        <option>Grupo 3</option>
-        <option>Grupo 4</option>
-        <option>Instalação (toda parada)</option>
-      </select>
-    </div>
-    <div class="campo">
-      <span>Hora Início</span>
-      <input type="time" data-role="inicio">
-    </div>
-    <div class="campo">
-      <span>Hora Fim</span>
-      <input type="time" data-role="fim">
-    </div>
-    <div class="campo">
-      <span>Total (HH:MM)</span>
-      <input data-role="total" readonly>
-    </div>
-    <button type="button" class="btn-danger remover" data-role="remover">Remover</button>
-  `;
-
-  const inInicio = row.querySelector('[data-role="inicio"]');
-  const inFim = row.querySelector('[data-role="fim"]');
-  const inTotal = row.querySelector('[data-role="total"]');
-
-  function atualizar(){ inTotal.value = calcDuracaoHHMM(inInicio.value, inFim.value); }
-  inInicio.addEventListener("change", atualizar);
-  inFim.addEventListener("change", atualizar);
-
-  row.querySelector('[data-role="remover"]').addEventListener("click", ()=>row.remove());
-  listaGrupos.appendChild(row);
-  return row;
-}
-
-grupo_status.addEventListener("change", () => {
-  const sim = grupo_status.value === "Sim";
-  gruposBox.style.display = sim ? "block" : "none";
-  if(!sim) limparGrupos();
-  else if(listaGrupos.children.length === 0) criarLinhaGrupo();
-});
-btnAddGrupo.addEventListener("click", ()=>criarLinhaGrupo());
-
-function coletarGrupos(){
-  const rows = [...listaGrupos.querySelectorAll(".group-row")];
-  return rows.map(r=>({
-    grupo: r.querySelector('[data-role="grupo"]').value,
-    inicio: r.querySelector('[data-role="inicio"]').value,
-    fim: r.querySelector('[data-role="fim"]').value,
-    total: r.querySelector('[data-role="total"]').value
-  })).filter(g => g.grupo || g.inicio || g.fim || g.total);
-}
-function validarGrupos(){
-  if(grupo_status.value !== "Sim") return true;
-  const gs = coletarGrupos();
-  if(gs.length === 0) return false;
-  for(const g of gs){
-    if(isBlank(g.grupo) || isBlank(g.inicio) || isBlank(g.fim) || isBlank(g.total)) return false;
-  }
-  return true;
-}
-
-// ========= GRANDEZAS ELÉTRICAS (MANTIDO) =========
-const medirStatus = document.getElementById("medir_status");
-const medirBox = document.getElementById("medir_box");
-const medirDados = document.getElementById("medir_dados");
-
-medirStatus.addEventListener("change", () => {
-  const sim = medirStatus.value === "Sim";
-  medirBox.style.display = sim ? "block" : "none";
-  if(!sim) medirDados.value = "";
-});
-function validarEletrica(){
-  if(isBlank(medirStatus.value)) return false;
-  if(medirStatus.value === "Sim" && isBlank(medirDados.value)) return false;
-  return true;
-}
-
-// ========= HIDRÁULICA =========
-const hidStatus = document.getElementById("hid_status");
-const hidBox = document.getElementById("hid_box");
-const hidDados = document.getElementById("hid_dados");
-
-hidStatus.addEventListener("change", () => {
-  const sim = hidStatus.value === "Sim";
-  hidBox.style.display = sim ? "block" : "none";
-  if(!sim) hidDados.value = "";
-});
-function validarHidraulica(){
-  if(isBlank(hidStatus.value)) return false;
-  if(hidStatus.value === "Sim" && isBlank(hidDados.value)) return false;
-  return true;
-}
-
-// ========= MATERIAIS =========
-const matStatus = document.getElementById("mat_status");
-const matBox = document.getElementById("mat_box");
-const matDados = document.getElementById("mat_dados");
-
-matStatus.addEventListener("change", () => {
-  const sim = matStatus.value === "Sim";
-  matBox.style.display = sim ? "block" : "none";
-  if(!sim) matDados.value = "";
-});
-function validarMateriais(){
-  if(isBlank(matStatus.value)) return false;
-  if(matStatus.value === "Sim" && isBlank(matDados.value)) return false;
-  return true;
-}
-
-// ========= ASSINATURA =========
-const canvas = document.getElementById("sign");
-const ctx = canvas.getContext("2d");
-function resizeCanvas(){
-  const r = window.devicePixelRatio || 1;
-  canvas.width = canvas.offsetWidth * r;
-  canvas.height = canvas.offsetHeight * r;
-  ctx.setTransform(r,0,0,r,0,0);
-  ctx.lineWidth = 2;
-  ctx.lineCap = "round";
-  ctx.strokeStyle = "#000";
-}
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas();
-
-let desenhando = false;
-function getPos(e){
-  const rect = canvas.getBoundingClientRect();
-  if(e.touches && e.touches[0]) return [e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top];
-  return [e.clientX - rect.left, e.clientY - rect.top];
-}
-function startDraw(e){
-  e.preventDefault();
-  desenhando = true;
-  ctx.beginPath();
-  const [x,y] = getPos(e);
-  ctx.moveTo(x,y);
-}
-function moveDraw(e){
-  if(!desenhando) return;
-  e.preventDefault();
-  const [x,y] = getPos(e);
-  ctx.lineTo(x,y);
-  ctx.stroke();
-}
-function endDraw(){ desenhando = false; }
-
-canvas.addEventListener("mousedown", startDraw);
-canvas.addEventListener("mousemove", moveDraw);
-canvas.addEventListener("mouseup", endDraw);
-canvas.addEventListener("mouseleave", endDraw);
-canvas.addEventListener("touchstart", startDraw, {passive:false});
-canvas.addEventListener("touchmove", moveDraw, {passive:false});
-canvas.addEventListener("touchend", endDraw);
-
-function limparAssinatura(){ ctx.clearRect(0,0,canvas.width,canvas.height); }
-
-// ========= FOTOS =========
-let imagens = [];
-fotos.onchange = (e) => {
-  imagens = [];
-  preview.innerHTML = "";
-  [...e.target.files].forEach(file=>{
-    const r = new FileReader();
-    r.onload = (x)=>{
-      imagens.push({ dataUrl: x.target.result, name: file.name });
-      const im = document.createElement("img");
-      im.src = x.target.result;
-      preview.appendChild(im);
-    };
-    r.readAsDataURL(file);
-  });
-};
-
-// ========= PDF / WHATS =========
-async function fetchAsDataURL(url){
-  const res = await fetch(url);
-  const blob = await res.blob();
-  return await new Promise((resolve)=>{
-    const fr = new FileReader();
-    fr.onload = () => resolve(fr.result);
-    fr.readAsDataURL(blob);
-  });
-}
-
-function buildWhatsText(){
-  const parts = [];
-  parts.push("OM RP ENGENHARIA");
-  parts.push(`OS: ${os.value}`);
-  parts.push(`Instalação: ${instalacao.value}`);
-  parts.push(`Município: ${municipio.value}`);
-  if(!isBlank(data.value)) parts.push(`Data: ${data.value}`);
-  if(!isBlank(hora.value)) parts.push(`Hora: ${hora.value}`);
-
-  parts.push(`Equipe: ${listarEquipe().join(" / ")}`);
-
-  parts.push(`Grupos indisponíveis: ${grupo_status.value}`);
-  if(grupo_status.value === "Sim"){
-    coletarGrupos().forEach((g, idx)=>{
-      parts.push(`#${idx+1} - ${g.grupo} - Início ${g.inicio} - Fim ${g.fim} - Total ${g.total}`);
-    });
-  }
-
-  parts.push(`Medir grandezas elétricas: ${medirStatus.value}`);
-  if(medirStatus.value === "Sim") parts.push(`Medições elétricas: ${medirDados.value}`);
-
-  parts.push(`Inspeção hidráulica: ${hidStatus.value}`);
-  if(hidStatus.value === "Sim") parts.push(`Medições hidráulicas: ${hidDados.value}`);
-
-  parts.push(`Materiais: ${matStatus.value}`);
-  if(matStatus.value === "Sim") parts.push(`Descrição: ${matDados.value}`);
-
-  if(!isBlank(resumo.value)) parts.push(`Situação: ${resumo.value}`);
-  if(!isBlank(ocorrencia.value)) parts.push(`Ocorrência: ${ocorrencia.value}`);
-  if(!isBlank(realizado.value)) parts.push(`Serviço realizado: ${realizado.value}`);
-  parts.push(`Responsável: ${responsavel.value}`);
-  return parts.join("\n");
-}
-
-async function gerarPDFBlob(){
-  if(isBlank(instalacao.value) || isBlank(municipio.value) || isBlank(os.value) || isBlank(resumo.value) || isBlank(responsavel.value)){
-    alert("Preencha os campos obrigatórios: Instalação, Município, OS SAP, Situação encontrada e Responsável.");
-    throw new Error("Campos obrigatórios não preenchidos.");
-  }
-  if(isBlank(nome1.value) || isBlank(nome2.value)){
-    alert("Preencha os 2 nomes obrigatórios da equipe (Nome 1 e Nome 2).");
-    throw new Error("Equipe obrigatória.");
-  }
-  if(imagens.length === 0){
-    alert("Inclua pelo menos 1 foto (obrigatório).");
-    throw new Error("Sem fotos.");
-  }
-  if(isBlank(grupo_status.value)){
-    alert("Informe se houve grupos indisponíveis (Selecione Sim ou Não).");
-    throw new Error("Grupo status obrigatório.");
-  }
-  if(!validarGrupos()){
-    alert("Preencha os grupos indisponíveis: Grupo + Hora Início + Hora Fim (para cada linha).");
-    throw new Error("Grupos inválidos.");
-  }
-  if(!validarEletrica()){
-    alert("Preencha 'Grandezas Elétricas' e, se Sim, informe as medições.");
-    throw new Error("Elétrica obrigatório.");
-  }
-  if(!validarHidraulica()){
-    alert("Preencha 'Inspeção hidráulica' e, se Sim, informe as medições.");
-    throw new Error("Hidráulica obrigatório.");
-  }
-  if(!validarMateriais()){
-    alert("Preencha 'Materiais' e, se Sim, descreva os materiais.");
-    throw new Error("Materiais obrigatório.");
-  }
-
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit: "mm", format: "a4", compress: true });
-
-  let logo = "";
-  try { logo = await fetchAsDataURL("RP.jpg"); } catch(e) {}
-  if(logo){
-    try { doc.addImage(logo, "JPEG", 10, 8, 55, 18); }
-    catch(e){ doc.addImage(logo, "PNG", 10, 8, 55, 18); }
-  }
-
-  doc.setFontSize(14);
-  doc.text("ORDEM DE MANUTENÇÃO - RP ENGENHARIA", 105, 18, { align: "center" });
-  doc.setFontSize(9);
-  doc.text("Desenvolvido por Lucas Moreira Rodrigues", 105, 24, { align: "center" });
-
-  const equipe = listarEquipe().join(" / ");
-  const dados = [
-    ["Instalação", instalacao.value],
-    ["Município", municipio.value],
-    ["OS SAP", os.value],
-    ["Data", data.value || ""],
-    ["Hora", hora.value || ""],
-    ["APR", apr.value || ""],
-    ["LPE", lpe.value || ""],
-    ["PET", pet.value || ""],
-    ["Equipe", equipe],
-    ["Grupos indisponíveis", grupo_status.value],
-    ["Medir grandezas elétricas", medirStatus.value],
-    ["Inspeção hidráulica", hidStatus.value],
-    ["Materiais", matStatus.value],
-  ];
-  if(medirStatus.value === "Sim") dados.push(["Medições elétricas", medirDados.value]);
-  if(hidStatus.value === "Sim") dados.push(["Medições hidráulicas", hidDados.value]);
-  if(matStatus.value === "Sim") dados.push(["Materiais (descrição)", matDados.value]);
-
-  doc.autoTable({
-    startY: 30,
-    head: [["Campo", "Valor"]],
-    body: dados,
-    styles: { fontSize: 9, cellPadding: 2 },
-    headStyles: { fillColor: [11, 61, 145] },
-    theme: "grid"
-  });
-
-  let y = doc.lastAutoTable.finalY + 6;
-
-  if(grupo_status.value === "Sim"){
-    const body = coletarGrupos().map(g => [g.grupo, g.inicio, g.fim, g.total]);
-    doc.setFontSize(11);
-    doc.text("Detalhamento de Grupos Indisponíveis", 10, y);
-    y += 2;
-
-    doc.autoTable({
-      startY: y + 2,
-      head: [["Grupo", "Hora Início", "Hora Fim", "Total (HH:MM)"]],
-      body,
-      styles: { fontSize: 9, cellPadding: 2 },
-      headStyles: { fillColor: [11, 61, 145] },
-      theme: "grid"
-    });
-    y = doc.lastAutoTable.finalY + 6;
-  }
-
-  doc.setFontSize(11);
-  doc.text("Serviços", 10, y);
-  y += 4;
-
-  const blocos = [
-    ["Situação encontrada", resumo.value],
-    ["Ocorrência", ocorrencia.value || ""],
-    ["Serviço realizado", realizado.value || ""]
-  ];
-
-  doc.setFontSize(9);
-  for(const [tit, txt] of blocos){
-    doc.setFont(undefined, "bold");
-    doc.text(tit + ":", 10, y);
-    y += 4;
-    doc.setFont(undefined, "normal");
-
-    const lines = doc.splitTextToSize(txt || "", 190);
-    doc.text(lines, 10, y);
-    y += Math.max(6, lines.length * 4) + 2;
-
-    if(y > 250){
-      doc.addPage();
-      y = 20;
-    }
-  }
-
-  doc.setFont(undefined, "bold");
-  doc.text("Responsável: ", 10, y);
-  doc.setFont(undefined, "normal");
-  doc.text(responsavel.value, 35, y);
-  y += 8;
-
-  doc.setFont(undefined, "bold");
-  doc.text("Assinatura:", 10, y);
-  doc.setFont(undefined, "normal");
-  y += 2;
-
-  const signData = canvas.toDataURL("image/png");
-  doc.addImage(signData, "PNG", 10, y, 80, 30);
-  y += 38;
-
-  doc.setFont(undefined, "bold");
-  doc.text("Fotos", 10, y);
-  doc.setFont(undefined, "normal");
-  y += 4;
-
-  for(let i=0; i<imagens.length; i++){
-    if(y > 240){
-      doc.addPage();
-      y = 20;
-    }
-    doc.setFontSize(9);
-    doc.text(`Foto ${i+1}`, 10, y);
-    y += 2;
-
-    const imgData = imagens[i].dataUrl;
-    try { doc.addImage(imgData, "JPEG", 10, y, 180, 90, undefined, "FAST"); }
-    catch(e){ doc.addImage(imgData, "PNG", 10, y, 180, 90); }
-
-    y += 98;
-  }
-
-  const osSafe = limparTextoArquivo(os.value) || "SEM_OS";
-  const filename = `OM_${dataHoraArquivo()}_${osSafe}.pdf`;
-  const blob = doc.output("blob");
-  return { blob, filename };
-}
-
-async function gerarPDF(){
-  const { blob, filename } = await gerarPDFBlob();
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
-
-async function enviarWhats(){
-  const texto = buildWhatsText();
-  const { blob, filename } = await gerarPDFBlob();
-  const file = new File([blob], filename, { type: "application/pdf" });
-
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    try{
-      await navigator.share({
-        title: "OM RP Engenharia",
-        text: texto,
-        files: [file]
-      });
-      return;
-    }catch(e){}
-  }
-
-  await gerarPDF();
-  const link = "https://wa.me/" + WHATS_PHONE + "?text=" + encodeURIComponent(
-    texto + "\n\nPDF gerado: " + filename + "\n(Anexe o arquivo baixado aqui.)"
-  );
-  window.open(link, "_blank");
+    .replace(/_+/g, "_ see")
 }
 </script>
-
 </body>
 </html>
