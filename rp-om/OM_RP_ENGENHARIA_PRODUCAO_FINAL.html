@@ -79,7 +79,7 @@
     <div class="campo"><span>OS SAP *</span><input id="os"></div>
     <div class="campo"><span>Data</span><input type="date" id="data"></div>
 
-    <div class="campo"><span>Horário inicial *</span><input type="time" id="hora_inicio"></div>
+    <div class="campo"><span>Horário inicial da atividade da atividade da atividade *</span><input type="time" id="hora_inicio"></div>
     <div class="campo"><span></span><div style="height:38px"></div></div>
     <div class="campo"><span></span><div style="height:38px"></div></div>
     <div class="campo"><span></span><div style="height:38px"></div></div>
@@ -463,7 +463,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function validarFormulario(){
     if(isBlank($("instalacao").value) || isBlank($("municipio").value) || isBlank($("os").value)) return {ok:false,msg:"Preencha Instalação, Município e OS SAP."};
-    if(isBlank($("hora_inicio").value) || isBlank($("hora_fim").value)) return {ok:false,msg:"Preencha Horário inicial e Horário final da atividade."};
+    if(isBlank($("hora_inicio").value) || isBlank($("hora_fim").value)) return {ok:false,msg:"Preencha Horário inicial da atividade da atividade da atividade e Horário final da atividade."};
     atualizarTempoAtividade();
     if(isBlank($("tempo_atividade").value)) return {ok:false,msg:"Verifique os horários da atividade."};
 
@@ -495,7 +495,7 @@ document.addEventListener("DOMContentLoaded", () => {
     parts.push(`Instalação: ${$("instalacao").value}`);
     parts.push(`Município: ${$("municipio").value}`);
     parts.push(`Data: ${$("data").value || ""}`);
-    parts.push(`Horário inicial: ${$("hora_inicio").value}`);
+    parts.push(`Horário inicial da atividade da atividade: ${$("hora_inicio").value}`);
     parts.push(`Horário final: ${$("hora_fim").value}`);
     parts.push(`Tempo de atividade: ${$("tempo_atividade").value}`);
     parts.push(`Equipe: ${listarEquipe().join(" / ")}`);
@@ -551,7 +551,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ["Município", $("municipio").value],
       ["OS SAP", $("os").value],
       ["Data", $("data").value || ""],
-      ["Horário inicial", $("hora_inicio").value],
+      ["Horário inicial da atividade da atividade", $("hora_inicio").value],
       ["Horário final", $("hora_fim").value],
       ["Tempo de atividade", tempoAtv],
       ["APR", $("apr").value],
@@ -746,7 +746,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ["Município", $("municipio").value],
       ["OS SAP", $("os").value],
       ["Data", $("data").value || ""],
-      ["Horário inicial", $("hora_inicio").value],
+      ["Horário inicial da atividade da atividade", $("hora_inicio").value],
       ["Horário final", $("hora_fim").value],
       ["Tempo de atividade", tempoAtv],
       ["APR", $("apr").value],
