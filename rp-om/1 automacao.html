@@ -54,7 +54,6 @@
     .brand p{margin:2px 0 0;font-size:12px;color:var(--muted)}
     nav a{
       color:var(--muted); text-decoration:none; font-size:13px; margin-left:14px;
-      display:inline-block; padding:10px 0;
     }
     nav a:hover{color:var(--text)}
     .hero{
@@ -154,7 +153,6 @@
       backdrop-filter: blur(10px);
       box-shadow: var(--shadow);
       overflow:hidden;
-      max-height:85vh; /* garante caber no mobile */
     }
     .modal header{
       border:0;border-bottom:1px solid var(--border);
@@ -163,7 +161,7 @@
       position:unset;
     }
     .modal header h3{margin:0;font-size:16px}
-    .modal .body{padding:16px 18px 18px; overflow:auto; max-height:calc(85vh - 72px)}
+    .modal .body{padding:16px 18px 18px}
     label{display:block;font-size:12px;color:var(--muted);margin:12px 0 6px}
     input, select{
       width:100%;
@@ -224,11 +222,10 @@
     footer.site{
       margin-top:22px;color:rgba(167,179,208,.85);font-size:12px
     }
-
-    /* Acessibilidade: foco visível no teclado */
-    :focus-visible{ outline:2px solid rgba(79,140,255,.85); outline-offset:3px }
   </style>
-  <!-- jsPDF será carregado sob demanda (melhor performance no mobile) -->
+
+  <!-- jsPDF (gera PDF direto no navegador) -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -1027,27 +1024,7 @@ Quero entrar na jornada/treinamento e receber instruções de matrícula.`;
     errorBox.style.display = "block";
   }
 
-
-  let _jspdfLoadingPromise = null;
-  function loadJsPDF(){
-    if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve();
-    if (_jspdfLoadingPromise) return _jspdfLoadingPromise;
-
-    _jspdfLoadingPromise = new Promise((resolve, reject) => {
-      const s = document.createElement("script");
-      s.src = "https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js";
-      s.async = true;
-      s.onload = () => resolve();
-      s.onerror = () => reject(new Error("Falha ao carregar jsPDF"));
-      document.head.appendChild(s);
-    });
-    return _jspdfLoadingPromise;
-  }
-
-
   async function gerarPDF(nome, cpfFmt, curso, isPreview){
-    await loadJsPDF();
-    if (!window.jspdf || !window.jspdf.jsPDF) throw new Error("jsPDF não disponível");
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
 
